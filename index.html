@@ -344,7 +344,8 @@ dialog h2 { font-size: 17px; }
     <div class="hint" style="text-align:center">或者</div>
     <button class="btn" type="button" id="login-google">用 Google 账号登录</button>
     <span class="hint" id="login-msg" role="status"></span>
-    <span class="hint mono" style="opacity:.6">版本 2026-11-12b</span>
+    <span class="hint mono" style="opacity:.6">版本 2026-11-12c</span>
+    <pre id="login-trace" class="hint mono" style="white-space:pre-wrap;font-size:11px;margin:0;opacity:.7"></pre>
   </form>
 </div>
 
@@ -441,6 +442,16 @@ dialog h2 { font-size: 17px; }
 
   /* ---------- data layer: shared Supabase database ---------- */
   var INITIAL_URL = location.href; // captured before the auth library tidies the address bar
+  // sign-in trace: kept in this browser so a failed sign-in can be diagnosed from a screenshot
+  function trace(msg) {
+    var log = [];
+    try { log = JSON.parse(localStorage.getItem("luckey-trace") || "[]"); } catch (e) {}
+    log.push(new Date().toTimeString().slice(0, 8) + " " + msg);
+    log = log.slice(-8);
+    try { localStorage.setItem("luckey-trace", JSON.stringify(log)); } catch (e) {}
+    var el = document.getElementById("login-trace"); if (el) el.textContent = log.join("\n");
+  }
+  trace("load " + (/[?&]code=/.test(INITIAL_URL) ? "with code" : /error/.test(INITIAL_URL) ? "with error: " + INITIAL_URL.split(/[?#]/)[1].slice(0, 120) : "plain"));
   var sb = window.supabase.createClient("https://wdfavbffnxuysempllsf.supabase.co", "sb_publishable_K7ywEfAXdgEOJqMWZJ1rtA_L3FqWJhp", { auth: { flowType: "pkce", detectSessionInUrl: false, persistSession: true } });
   var ME = null, MEMBERS = {};
   var RAW = { people: [], orgs: [], person_orgs: [], interactions: [], insights: [], tasks: [], drafts: [], reports: [], settings: [], members: [] };
@@ -1272,6 +1283,7 @@ dialog h2 { font-size: 17px; }
     });
   });
   $("login-google").addEventListener("click", function () {
+    trace("google clicked");
     $("login-msg").textContent = "正在跳转到 Google…";
     sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } }).then(function (res) {
       if (res.error) $("login-msg").textContent = /not enabled|provider/i.test(res.error.message) ? "Google 登录还没在 Supabase 里打开，先用邮件登录。" : "跳转失败：" + res.error.message;
@@ -1298,8 +1310,10 @@ dialog h2 { font-size: 17px; }
   var subscribed = false;
   function start(session) {
     if (!session) { showLogin(); return; }
+    trace("session " + session.user.email + " id " + session.user.id.slice(0, 8));
     sb.rpc("claim_membership").then(function (res) {
       var m = res.data;
+      trace("member: " + (res.error ? "error " + res.error.message : (m && m.id ? m.name + " " + m.role : "none")));
       if (res.error || !m || !m.id) { showLogin(res.error ? "读取成员身份失败：" + res.error.message : "你登录的账号（" + session.user.email + "）还没有对应的成员身份。如果这个邮箱已经是成员，请截图发给 Claude。"); return; }
       ME = m; $("login").hidden = true;
       $("me-name").textContent = ME.name + (ME.role === "viewer" ? "（只读）" : "");
@@ -1327,7 +1341,9 @@ dialog h2 { font-size: 17px; }
   var ready;
   if (codeM) {
     history.replaceState(null, "", location.pathname);
+    trace("verifier in browser: " + hasVerifier);
     ready = sb.auth.exchangeCodeForSession(decodeURIComponent(codeM[1])).then(function (r) {
+      trace("exchange: " + (r.error ? "error " + r.error.message : "ok " + (r.data.session && r.data.session.user.email)));
       if (r.error) {
         showLogin("登录没有完成：" + r.error.message + (hasVerifier ? "" : "（这个浏览器里找不到发起登录时的记录：请在同一个浏览器、同一个页面点登录，不要换标签页或浏览器）") + "。请截图发给 Claude。");
         return null;
@@ -1337,7 +1353,8 @@ dialog h2 { font-size: 17px; }
   } else {
     ready = sb.auth.getSession().then(function (r) { return r.data && r.data.session; });
   }
-  ready.then(function (s) {
+  ready.catch(function (e) { trace("exception " + (e && e.message)); return null; }).then(function (s) {
+    trace("ready: " + (s ? "session" : "no session"));
     if (s) return start(s);
     if (urlErr) showLogin(urlErr[1] === "otp_expired"
       ? "这个登录链接已经失效了（每封只能用一次，而且只有最新的一封有效）。请重新发送，并点开最新的那封邮件。"
