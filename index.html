@@ -439,6 +439,7 @@ dialog h2 { font-size: 17px; }
   function fallback(t) { var a = document.createElement("textarea"); a.value = t; a.style.position = "fixed"; a.style.opacity = "0"; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); } catch (e) {} a.remove(); }
 
   /* ---------- data layer: shared Supabase database ---------- */
+  var INITIAL_URL = location.href; // captured before the auth library tidies the address bar
   var sb = window.supabase.createClient("https://wdfavbffnxuysempllsf.supabase.co", "sb_publishable_K7ywEfAXdgEOJqMWZJ1rtA_L3FqWJhp", { auth: { flowType: "pkce", detectSessionInUrl: true, persistSession: true } });
   var ME = null, MEMBERS = {};
   var RAW = { people: [], orgs: [], person_orgs: [], interactions: [], insights: [], tasks: [], drafts: [], reports: [], settings: [], members: [] };
@@ -1298,7 +1299,7 @@ dialog h2 { font-size: 17px; }
     if (!session) { showLogin(); return; }
     sb.rpc("claim_membership").then(function (res) {
       var m = res.data;
-      if (res.error || !m || !m.id) { showLogin("你用的邮箱（" + session.user.email + "）还不是成员。请让管理员在“设置 → 成员”里添加你。"); return; }
+      if (res.error || !m || !m.id) { showLogin(res.error ? "读取成员身份失败：" + res.error.message : "你登录的账号（" + session.user.email + "）还没有对应的成员身份。如果这个邮箱已经是成员，请截图发给 Claude。"); return; }
       ME = m; $("login").hidden = true;
       $("me-name").textContent = ME.name + (ME.role === "viewer" ? "（只读）" : "");
       S.canWrite = true; if (ME.role === "viewer") setReadOnly();
@@ -1317,8 +1318,14 @@ dialog h2 { font-size: 17px; }
   }
   var urlErr = /error_code=([a-z_]+)/.exec(location.search + location.hash);
   if (urlErr) history.replaceState(null, "", location.pathname);
+  var cameBack = /[?&#](code|error|error_description)=/.test(INITIAL_URL);
+  var urlDesc = (/error_description=([^&#]+)/.exec(INITIAL_URL) || [])[1];
   sb.auth.getSession().then(function (res) {
     var s = res.data && res.data.session;
+    if (!s && cameBack && !urlErr) {
+      showLogin("登录没有完成：" + (urlDesc ? decodeURIComponent(urlDesc.replace(/\+/g, " ")) : (res.error ? res.error.message : "浏览器没有拿到登录凭证")) + "。请截图发给 Claude。");
+      return;
+    }
     if (!s && urlErr) showLogin(urlErr[1] === "otp_expired"
       ? "这个登录链接已经失效了（每封只能用一次，而且只有最新的一封有效）。请重新发送，并点开最新的那封邮件。"
       : "登录没有成功（" + urlErr[1] + "）。请重新发送登录链接。");
