@@ -1,0 +1,1323 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luckey Outreach Desk</title></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@600;700&display=swap">
+<style>
+/* layout: fixed left nav (collapses to a top strip under 900px) + one working column per page; dashboards use a 12-col grid */
+:root {
+  --bg: #F2F4F5; --surface: #FFFFFF; --surface-2: #EAEEF0; --ink: #132027; --muted: #5B6871; --line: #D8DEE2;
+  --accent: #0E6B73; --accent-ink: #FFFFFF; --accent-soft: #DCEFF0;
+  --nav: #10272C; --nav-ink: #C9DBDD; --nav-active: #FFFFFF; --nav-hover: #1A383E;
+  --gold: #8A5F00; --gold-soft: #FBF0D3; --warn: #A2400E; --warn-soft: #FCE8DC;
+  --ok: #2C7A3F; --ok-soft: #E1F2E5; --info: #2F55C8; --info-soft: #E3EAFB; --mute-soft: #E6EAED;
+  --s1: #0E6B73; --s2: #4B95A0; --s3: #9CC7CC;
+  --f-display: "Schibsted Grotesk", "IBM Plex Sans", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1518; --surface: #151E22; --surface-2: #1C272C; --ink: #E4ECEF; --muted: #93A3AB; --line: #29363C;
+  --accent: #52B9C0; --accent-ink: #06292C; --accent-soft: #143A3E;
+  --nav: #0A1214; --nav-ink: #9FB4B8; --nav-active: #FFFFFF; --nav-hover: #15262A;
+  --gold: #E3B84D; --gold-soft: #3A2F12; --warn: #F08A55; --warn-soft: #3F2316;
+  --ok: #6CC584; --ok-soft: #183522; --info: #8BA8F6; --info-soft: #1C2A4D; --mute-soft: #222D33;
+  --s1: #52B9C0; --s2: #3B8790; --s3: #255B61;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0E1518; --surface: #151E22; --surface-2: #1C272C; --ink: #E4ECEF; --muted: #93A3AB; --line: #29363C;
+  --accent: #52B9C0; --accent-ink: #06292C; --accent-soft: #143A3E;
+  --nav: #0A1214; --nav-ink: #9FB4B8; --nav-active: #FFFFFF; --nav-hover: #15262A;
+  --gold: #E3B84D; --gold-soft: #3A2F12; --warn: #F08A55; --warn-soft: #3F2316;
+  --ok: #6CC584; --ok-soft: #183522; --info: #8BA8F6; --info-soft: #1C2A4D; --mute-soft: #222D33;
+  --s1: #52B9C0; --s2: #3B8790; --s3: #255B61;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.55; margin: 0; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--nav); }
+a { color: var(--accent); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* shell */
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; height: 100vh; background: var(--nav); color: var(--nav-ink); display: flex; flex-direction: column; padding: 18px 12px; padding-left: max(12px, env(safe-area-inset-left, 0px)); gap: 4px; }
+.nav .brand { font-family: var(--f-display); font-weight: 700; color: var(--nav-active); font-size: 17px; padding: 2px 10px 2px; }
+.nav .brand small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 11.5px; color: var(--nav-ink); letter-spacing: .02em; margin-top: 2px; }
+.nav .group { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--nav-ink); opacity: .7; padding: 14px 10px 4px; }
+.nav a.item { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-decoration: none; color: var(--nav-ink); padding: 7px 10px; border-radius: 6px; font-weight: 500; }
+.nav a.item:hover { background: var(--nav-hover); color: var(--nav-active); }
+.nav a.item[aria-current="page"] { background: var(--nav-hover); color: var(--nav-active); box-shadow: inset 2px 0 0 var(--s1); }
+.nav .count { font-family: var(--f-mono); font-size: 11px; min-width: 20px; text-align: center; border-radius: 999px; padding: 0 6px; background: var(--warn); color: #fff; }
+.nav .spacer { flex: 1; }
+.nav .foot { display: grid; gap: 6px; padding: 10px; font-size: 12px; }
+.nav .foot button { background: none; border: 1px solid var(--nav-hover); color: var(--nav-ink); border-radius: 6px; padding: 6px 10px; cursor: pointer; text-align: left; }
+.nav .foot button:hover { color: var(--nav-active); }
+.ro-pill { color: var(--gold); }
+main { min-width: 0; padding-block: 24px 64px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.page { max-width: 1200px; margin: 0 auto; display: grid; gap: 18px; }
+.page[hidden] { display: none; }
+.page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.page-head h1 { font-size: 24px; }
+.page-head p { margin: 2px 0 0; color: var(--muted); }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .nav { position: sticky; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); z-index: 20; }
+  .nav .group, .nav .spacer, .nav .brand small { display: none; }
+  .nav .brand { width: 100%; padding: 0 0 4px; }
+  .nav .foot { display: flex; padding: 0; margin-left: auto; }
+  main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+
+/* primitives */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
+.panel > header { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.panel > header h2 { font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.panel > header .sub { color: var(--muted); font-size: 12.5px; font-weight: 400; font-family: var(--f-body); }
+.panel .body { padding: 14px 16px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-weight: 500; font-size: 13px; white-space: nowrap; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { border-color: transparent; background: none; color: var(--accent); padding-inline: 6px; }
+.btn.danger { color: var(--warn); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--mute-soft); color: var(--muted); white-space: nowrap; font-weight: 500; }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.info { background: var(--info-soft); color: var(--info); }
+.chip.gold { background: var(--gold-soft); color: var(--gold); }
+.chip.accent { background: var(--accent-soft); color: var(--accent); }
+.hint { color: var(--muted); font-size: 12.5px; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.empty { color: var(--muted); padding: 22px; text-align: center; font-size: 13px; }
+.notice { background: var(--warn-soft); color: var(--warn); border-radius: var(--r); padding: 10px 14px; }
+.inp, .field input, .field select, .field textarea { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+.field textarea { resize: vertical; line-height: 1.55; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.preview { white-space: pre-wrap; background: var(--bg); border: 1px dashed var(--line); border-radius: 6px; padding: 10px 12px; font-size: 13px; overflow-wrap: anywhere; }
+.preview mark { background: var(--warn-soft); color: var(--warn); border-radius: 3px; padding: 0 2px; }
+.label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar .inp { width: auto; background: var(--surface); }
+.toolbar input.inp { flex: 1 1 200px; }
+
+/* overview */
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.kpi { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; }
+.kpi b { font-family: var(--f-mono); font-size: 26px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--muted); font-size: 12px; }
+.kpi em { font-style: normal; font-size: 11.5px; color: var(--muted); }
+@media (max-width: 900px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.dash { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; }
+.span-7 { grid-column: span 7; } .span-5 { grid-column: span 5; } .span-6 { grid-column: span 6; } .span-12 { grid-column: span 12; }
+@media (max-width: 1050px) { .span-7, .span-5, .span-6 { grid-column: span 12; } }
+.funnel { display: grid; gap: 10px; }
+.fstep { display: grid; grid-template-columns: 70px minmax(0, 1fr) 92px; gap: 10px; align-items: center; font-size: 13px; }
+.fbar { height: 22px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.fbar i { display: block; height: 100%; background: var(--s1); border-radius: 4px; }
+.fstep .v { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.fstep .v small { color: var(--muted); font-size: 11px; margin-left: 4px; }
+.bars { display: grid; gap: 8px; }
+.brow { display: grid; grid-template-columns: 120px minmax(0, 1fr) 84px; gap: 10px; align-items: center; font-size: 13px; }
+.brow .track { height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.brow .track i { display: block; height: 100%; background: var(--s2); }
+.brow .v { text-align: right; font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.feed { list-style: none; margin: 0; padding: 0; display: grid; }
+.feed li { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.feed li:first-child { border-top: 0; }
+.feed .d { font-family: var(--f-mono); color: var(--muted); font-size: 12px; }
+.stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.stage-n { background: var(--surface-2); border-radius: 6px; padding: 8px 10px; display: grid; }
+.stage-n b { font-family: var(--f-mono); font-size: 20px; font-weight: 500; }
+.stage-n span { font-size: 11.5px; color: var(--muted); }
+@media (max-width: 600px) { .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* today */
+.qitem { padding: 12px 16px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.qitem:first-child { border-top: 0; }
+.qgroup { padding: 8px 16px; background: var(--surface-2); border-top: 1px solid var(--line); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.qgroup + .qitem { border-top: 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 6px 14px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted); }
+.seg button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.qitem .name { font-weight: 600; }
+.qitem .sub { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.qitem .why { font-size: 13px; }
+.editor { display: grid; gap: 8px; margin-top: 6px; }
+
+/* kanban */
+.kanban { display: grid; grid-template-columns: repeat(6, minmax(190px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.col { background: var(--surface-2); border-radius: var(--r); padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 180px; }
+.col.over { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.col h3 { font-size: 13px; display: flex; justify-content: space-between; font-family: var(--f-body); font-weight: 600; }
+.col h3 span { font-family: var(--f-mono); color: var(--muted); font-weight: 400; }
+.kcard { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; gap: 4px; cursor: pointer; text-align: left; width: 100%; }
+.kcard[draggable="true"] { cursor: grab; }
+.kcard:hover { border-color: var(--muted); }
+.kcard .t { font-weight: 600; }
+.kcard .s { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+
+/* insights */
+.ins-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+@media (max-width: 1050px) { .ins-cols { grid-template-columns: minmax(0, 1fr); } }
+.ins-sum { background: var(--accent-soft); border-radius: 6px; padding: 10px 12px; font-size: 13px; }
+.ins-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ins-list li { border-left: 2px solid var(--s3); padding: 2px 0 2px 10px; font-size: 13.5px; }
+.ins-list .src { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* lists + detail */
+.split { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 1050px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.rail { display: grid; gap: 6px; }
+.card { text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; cursor: pointer; display: grid; gap: 3px; }
+.card:hover { border-color: var(--muted); }
+.card[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.card .t { font-weight: 600; }
+.card .s { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.group-h { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 8px 2px 0; font-weight: 600; }
+.detail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 1050px) { .detail { position: static; } }
+.detail .body > h2 { font-size: 20px; }
+.sec { margin-top: 18px; display: grid; gap: 8px; }
+.people { display: grid; gap: 6px; }
+.person { display: flex; justify-content: space-between; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer; background: none; text-align: left; width: 100%; }
+.person:hover { border-color: var(--muted); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.tl li { border-left: 2px solid var(--line); padding: 2px 0 2px 12px; }
+.tl li.meeting { border-left-color: var(--ok); }
+.tl li.email_received { border-left-color: var(--info); }
+.tl li.email_sent { border-left-color: var(--s2); }
+.tl .d { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.tl .ins { margin: 4px 0 0; padding-left: 18px; font-size: 13px; }
+.tasks { display: grid; gap: 6px; }
+.task { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; }
+.task input { margin-top: 3px; }
+.task.done span { text-decoration: line-through; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 6px 12px; font-size: 13.5px; }
+.kv dt { color: var(--muted); font-size: 12px; font-weight: 600; padding-top: 2px; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) { .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+.mini-form { display: grid; gap: 6px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); align-items: end; }
+.mini-form .wide { grid-column: 1 / -1; }
+
+/* people table */
+.tbl { overflow-x: auto; }
+.tbl table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13px; }
+.tbl td.orgs { font-size: 12.5px; color: var(--muted); max-width: 260px; }
+.pp-split { grid-template-columns: minmax(0, 1fr) minmax(0, 400px); }
+.pp-split.solo { grid-template-columns: minmax(0, 1fr); }
+.pp-split.solo #pp-detail { display: none; }
+@media (max-width: 1050px) { .pp-split { grid-template-columns: minmax(0, 1fr); } }
+.tbl th, .tbl td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+.tbl th { border-top: 0; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; white-space: nowrap; }
+.tbl th[aria-sort] { color: var(--ink); }
+.tbl tbody tr { cursor: pointer; }
+.tbl tbody tr:hover td { background: var(--surface-2); }
+.tbl tbody tr[aria-current="true"] td { background: var(--accent-soft); }
+
+/* reports */
+.report { max-width: 820px; }
+.report h1 { font-size: 22px; margin-bottom: 8px; }
+.report h2 { font-size: 16px; margin: 18px 0 8px; }
+.report p, .report li { max-width: 72ch; }
+.report table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
+.report th, .report td { border-top: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+.report th { color: var(--muted); font-size: 11.5px; border-top: 0; }
+
+dialog { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--ink); width: min(620px, calc(100vw - 32px)); padding: 0; }
+dialog::backdrop { background: rgba(5, 15, 18, .45); }
+dialog form { display: grid; gap: 12px; padding: 18px; }
+dialog h2 { font-size: 17px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; z-index: 40; }
+</style>
+
+<div class="shell">
+  <nav class="nav" aria-label="页面">
+    <div class="brand">Luckey Outreach<small>Physical AI 数据 · 专家与客户外联</small></div>
+    <div class="group">进展</div>
+    <a class="item" href="#overview" data-page="overview">总览</a>
+    <a class="item" href="#customers" data-page="customers">客户进度</a>
+    <a class="item" href="#insights" data-page="insights">洞察</a>
+    <a class="item" href="#reports" data-page="reports">报告</a>
+    <div class="group">工作</div>
+    <a class="item" href="#today" data-page="today">今天 <span class="count" id="nav-today" hidden></span></a>
+    <a class="item" href="#orgs" data-page="orgs">机构</a>
+    <a class="item" href="#people" data-page="people">人</a>
+    <div class="spacer"></div>
+    <div class="foot">
+      <span class="ro-pill" id="ro-pill" hidden>只读</span>
+      <span id="me-name"></span>
+      <button type="button" id="btn-settings">设置</button>
+      <button type="button" id="btn-signout">退出登录</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="notice" id="notice" hidden></div>
+
+    <!-- OVERVIEW -->
+    <section class="page" id="page-overview" aria-labelledby="h-overview">
+      <div class="page-head"><div><h1 id="h-overview">总览</h1><p id="ov-sub">外联的整体进展</p></div><span class="hint mono" id="ov-date"></span></div>
+      <div class="kpis" id="ov-kpis"></div>
+      <div class="dash">
+        <div class="panel span-7"><header><h2>联系漏斗</h2><span class="hint">每一步占名单的比例</span></header><div class="body"><div class="funnel" id="ov-funnel"></div></div></div>
+        <div class="panel span-5"><header><h2>哪类人最愿意回</h2><span class="hint">回复率 · 已发人数</span></header><div class="body"><div class="bars" id="ov-groups"></div></div></div>
+        <div class="panel span-7"><header><h2>最近 8 周</h2><div class="legend"><span><i style="background:var(--s1)"></i>发出</span><span><i style="background:var(--s2)"></i>回复</span><span><i style="background:var(--s3)"></i>会议</span></div></header><div class="body chart" id="ov-weeks"></div></div>
+        <div class="panel span-5"><header><h2>客户阶段</h2><a href="#customers" class="btn ghost">看客户进度</a></header><div class="body"><div class="stages" id="ov-stages"></div></div></div>
+        <div class="panel span-6"><header><h2>最近动态</h2></header><div class="body"><ul class="feed" id="ov-feed"></ul></div></div>
+        <div class="panel span-6"><header><h2>到期和逾期的承诺</h2></header><div class="body"><ul class="feed" id="ov-due"></ul></div></div>
+        <div class="panel span-12"><header><h2>最新报告</h2><a href="#reports" class="btn ghost">全部报告</a></header><div class="body" id="ov-report"></div></div>
+      </div>
+    </section>
+
+    <!-- TODAY -->
+    <section class="page" id="page-today" hidden aria-labelledby="h-today">
+      <div class="page-head"><div><h1 id="h-today">今天</h1><p id="td-sub"></p></div></div>
+      <div class="panel" id="q-confirm"></div>
+      <div class="panel" id="q-edit"></div>
+      <div class="panel" id="q-replies"></div>
+      <div class="panel" id="q-due"></div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section class="page" id="page-customers" hidden aria-labelledby="h-customers">
+      <div class="page-head"><div><h1 id="h-customers">客户进度</h1><p>可能成为客户的公司，按阶段排列。<span id="cu-drag">拖动卡片可以改阶段。</span></p></div></div>
+      <div class="kanban" id="kanban"></div>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section class="page" id="page-insights" hidden aria-labelledby="h-insights">
+      <div class="page-head"><div><h1 id="h-insights">洞察</h1><p>每次聊天学到的东西，按文档里的三个问题归类。</p></div>
+        <div class="toolbar"><select class="inp" id="in-cat" aria-label="来源类别"><option value="all">全部来源</option><option value="researcher">研究者</option><option value="engineer">一线工程师</option><option value="market">看市场的人</option><option value="customer">客户</option></select><input class="inp" id="in-q" type="search" placeholder="搜索内容或机构" aria-label="搜索洞察"></div></div>
+      <div class="ins-cols" id="ins-cols"></div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="page" id="page-reports" hidden aria-labelledby="h-reports">
+      <div class="page-head"><div><h1 id="h-reports">报告</h1><p>Agent 每周一生成一份，汇总这段时间发生的事。</p></div></div>
+      <div class="split"><div class="rail" id="rp-rail"></div><div class="panel"><div class="body report" id="rp-body"></div></div></div>
+    </section>
+
+    <!-- ORGS -->
+    <section class="page" id="page-orgs" hidden aria-labelledby="h-orgs">
+      <div class="page-head"><div><h1 id="h-orgs">机构</h1><p>公司、实验室和项目。同一机构里的人共享一条时间线。</p></div>
+        <div class="toolbar"><select class="inp" id="og-type" aria-label="机构类型"><option value="all">全部类型</option><option value="company">公司</option><option value="lab">实验室</option><option value="project">项目</option></select><input class="inp" id="og-q" type="search" placeholder="搜索机构" aria-label="搜索机构"></div></div>
+      <div class="split"><div class="rail" id="og-rail"></div><div class="panel detail" id="og-detail"></div></div>
+    </section>
+
+    <!-- PEOPLE -->
+    <section class="page" id="page-people" hidden aria-labelledby="h-people">
+      <div class="page-head"><div><h1 id="h-people">人</h1><p id="pp-sub"></p></div>
+        <div class="actions" id="pp-actions"><button class="btn primary" type="button" id="pp-add">添加一个人</button><button class="btn" type="button" id="pp-import">导入 CSV</button><button class="btn" type="button" id="pp-export" hidden>导出 CSV</button><input type="file" id="pp-file" accept=".csv,text/csv" hidden></div></div>
+      <div class="toolbar">
+        <select class="inp" id="pp-cat" aria-label="类别"><option value="all">全部类别</option><option value="researcher">研究者</option><option value="engineer">一线工程师</option><option value="market">看市场的人</option><option value="customer">客户</option></select>
+        <select class="inp" id="pp-dir" aria-label="方向"><option value="all">全部方向</option><option value="1">一 · 手和物体</option><option value="2">二 · 全身动作</option><option value="3">三 · 第一视角还原</option><option value="4">四 · 大规模数据</option></select>
+        <select class="inp" id="pp-status" aria-label="状态"><option value="open">进行中</option><option value="all">全部</option><option value="to_confirm">待确认</option><option value="confirmed">已确认</option><option value="sent">已发</option><option value="replied">已回复</option><option value="talked">已聊</option><option value="keep_in_touch">保持联系</option><option value="ended">已结束</option></select>
+        <input class="inp" id="pp-q" type="search" placeholder="搜索名字、职位、机构" aria-label="搜索人">
+      </div>
+      <div class="split pp-split" id="pp-split"><div class="panel"><div class="tbl" id="pp-table"></div></div><div class="panel detail" id="pp-detail"></div></div>
+    </section>
+  </main>
+</div>
+
+<div id="login" hidden style="position:fixed;inset:0;z-index:50;background:var(--bg);display:grid;place-items:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))">
+  <form id="login-form" class="panel" style="width:min(420px,100%);padding:24px;display:grid;gap:12px">
+    <h1 style="font-size:22px">Luckey Outreach</h1>
+    <p class="hint" style="margin:0">用你的成员邮箱登录。我们会发一个登录链接到你的邮箱，不需要密码。</p>
+    <div class="field"><label for="login-email">邮箱</label><input id="login-email" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+    <button class="btn primary" type="submit">发送登录链接</button>
+    <span class="hint" id="login-msg" role="status"></span>
+  </form>
+</div>
+
+<dialog id="dlg-settings" aria-labelledby="h-set">
+  <form method="dialog" id="settings-form">
+    <h2 id="h-set">发件人设置</h2>
+    <p class="hint" style="margin:0">这是你自己的发件人设置。邮件里的 {sender}、{berk}、{role} 会自动替换；签名附在每封邮件末尾。</p>
+    <div class="field"><label for="s-name">名字（英文）</label><input id="s-name" placeholder="e.g. Stella Ren"></div>
+    <div class="field"><label for="s-berk">Berkeley 身份（接在 "I'm" 后面）</label><input id="s-berk" placeholder="e.g. an EECS master's student"></div>
+    <div class="field"><label for="s-role">Luckey 角色（接在 "and" 后面）</label><input id="s-role" placeholder="e.g. one of the leads"></div>
+    <div class="field"><label for="s-sig">签名（可用 {sender}）</label><textarea id="s-sig" rows="4"></textarea></div>
+    <div class="actions"><button class="btn primary" value="save">保存</button><button class="btn" value="cancel" formnovalidate>取消</button></div>
+    <div id="members-box" class="sec" hidden><div class="label">成员</div><div id="members-list"></div>
+      <div class="mini-form"><input class="inp" id="m-name" placeholder="名字，例如 华超" aria-label="成员名字"><input class="inp" id="m-email" type="email" placeholder="登录邮箱" aria-label="成员邮箱">
+      <select class="inp" id="m-role" aria-label="角色"><option value="member">成员（能写）</option><option value="viewer">只读</option></select><button class="btn" type="button" id="m-add">添加成员</button></div>
+      <span class="hint">添加后，对方用这个邮箱在本页登录即可。</span></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-person" aria-labelledby="h-person">
+  <form method="dialog" id="person-form">
+    <h2 id="h-person">添加一个人</h2>
+    <div class="grid2">
+      <div class="field"><label for="f-name">姓名</label><input id="f-name" required></div>
+      <div class="field"><label for="f-title">职位和机构</label><input id="f-title" placeholder="e.g. Berkeley PhD，Malik 组"></div>
+      <div class="field"><label for="f-cat">类别</label><select id="f-cat"><option value="researcher">研究者</option><option value="engineer">一线工程师</option><option value="market">看市场的人</option><option value="customer">客户</option></select></div>
+      <div class="field"><label for="f-dir">方向（研究者）</label><select id="f-dir"><option value="">—</option><option value="1">一 · 手和物体</option><option value="2">二 · 全身动作</option><option value="3">三 · 第一视角还原</option><option value="4">四 · 大规模数据</option></select></div>
+      <div class="field"><label for="f-email">邮箱</label><input id="f-email" type="email"></div>
+      <div class="field"><label for="f-home">主页</label><input id="f-home" type="url" placeholder="https://"></div>
+    </div>
+    <div class="field"><label for="f-orgs">机构（用逗号分隔；没有的会新建）</label><input id="f-orgs" list="org-names" placeholder="e.g. Malik 组（Berkeley）, Do as I Do"><datalist id="org-names"></datalist></div>
+    <div class="field"><label for="f-why">为什么找他</label><textarea id="f-why" rows="2"></textarea></div>
+    <div class="field"><label for="f-verify">待核实</label><input id="f-verify"></div>
+    <div class="field"><label for="f-status">状态</label><select id="f-status"></select></div>
+    <div class="actions"><button class="btn primary" value="save" id="f-save">保存</button><button class="btn" value="cancel" formnovalidate>取消</button><span class="hint" id="f-state"></span></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-import" aria-labelledby="h-import">
+  <form method="dialog" id="import-form">
+    <h2 id="h-import">导入 CSV</h2>
+    <p class="hint" style="margin:0">认得这些列：name / 姓名，email / 邮箱，title / 职位，org / 机构 / 公司，category / 类别，direction / 方向，homepage / 主页，why / 原因。导入的人都进“待确认”。</p>
+    <div class="preview" id="imp-preview"></div>
+    <div class="actions"><button class="btn primary" value="save" id="imp-go">导入</button><button class="btn" value="cancel" formnovalidate>取消</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  "use strict";
+  var CAT = { researcher: "研究者", engineer: "一线工程师", market: "看市场的人", customer: "客户" };
+  var DIR = { "1": "一 · 手和物体", "2": "二 · 全身动作", "3": "三 · 第一视角还原", "4": "四 · 大规模数据" };
+  var STATUS = { to_confirm: "待确认", confirmed: "已确认", sent: "已发", replied: "已回复", talked: "已聊", keep_in_touch: "保持联系", closed: "结束", rejected: "不联系", do_not_contact: "对方要求不再联系", archived: "归档" };
+  var ENDED = ["closed", "rejected", "do_not_contact", "archived"];
+  var KIND = { first: "首封", followup: "跟进", reply: "回复", thanks: "感谢", checkin: "近况", sample: "样本" };
+  var TASK_KIND = { next_step: "下一步", we_promised: "我们答应的", they_promised: "对方答应的" };
+  var OWNER = { stella: "Stella", agent: "Agent", them: "对方" };
+  var TOPICS = [["data_quality", "什么样的数据才算好"], ["industry_gaps", "行业最缺什么"], ["who_pays", "谁在为数据花钱"]];
+  var STAGES = [["", "未开始"], ["talked", "已聊"], ["sample", "看样本 / 试用"], ["negotiating", "谈合作"], ["won", "成交"], ["lost", "结束"]];
+  var CTYPE = { robot_company: "机器人公司", big_co_team: "大公司团队", lab: "实验室", data_team: "数据团队" };
+  var OTYPE = { company: "公司", lab: "实验室", project: "项目" };
+  var EVTYPE = { email_sent: "发出", email_received: "回复", meeting: "会议", note: "笔记", intro: "介绍", bounce: "退信", opt_out: "不再联系" };
+  var REJECT = ["太资深", "方向不对", "不在美国", "同机构已在联系", "以前联系过", "其他"];
+  var DEFAULT_SIG = "Best,\n{sender}\nLuckey Global · luckey.to\nUC Berkeley";
+  var DAILY_CAP = 10;
+  var PAGES = ["overview", "today", "customers", "insights", "reports", "orgs", "people"];
+
+  var S = { contacts: {}, orgs: {}, events: {}, tasks: {}, reports: {}, sender: {}, insightSum: {}, canWrite: true, loaded: 0,
+    page: "overview", selOrg: null, selPerson: null, selReport: null, open: {}, sort: { k: "name", dir: 1 },
+    og: { type: "all", q: "" }, pp: { cat: "all", dir: "all", status: "open", q: "" }, ins: { cat: "all", q: "" } };
+  var db = null, downloads = null;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function toast(m) { var t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2400); }
+  function notice(m) { var n = $("notice"); n.textContent = m; n.hidden = false; }
+  function ymd(d) { d = d || new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function daysAgo(s) { if (!s) return null; return Math.floor((new Date(ymd()) - new Date(String(s).slice(0, 10))) / 864e5); }
+  function now() { return new Date().toISOString(); }
+  function vals(o) { return Object.keys(o).map(function (k) { return o[k]; }); }
+  function slug(s) { return String(s).toLowerCase().normalize("NFKD").replace(/[^\w一-鿿]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || Math.random().toString(36).slice(2, 8); }
+
+  /* ---------- placeholders + copy ---------- */
+  function fill(t) { var m = { sender: S.sender.name, berk: S.sender.berk, role: S.sender.role }; return String(t || "").replace(/\{(sender|berk|role)\}/g, function (x, k) { return m[k] || x; }); }
+  function sig() { return fill(S.sender.signature || DEFAULT_SIG); }
+  function full(body) { return fill(body) + "\n\n" + sig(); }
+  function marked(t) { return esc(t).replace(/\{(sender|berk|role)\}/g, "<mark>{$1}</mark>").replace(/\[([^\]\n]{1,120})\]/g, "<mark>[$1]</mark>"); }
+  function copy(t, label) {
+    var done = function () { toast("已复制" + label); };
+    try { navigator.clipboard.writeText(t).then(done, function () { fallback(t); done(); }); } catch (e) { fallback(t); done(); }
+  }
+  function fallback(t) { var a = document.createElement("textarea"); a.value = t; a.style.position = "fixed"; a.style.opacity = "0"; document.body.appendChild(a); a.select(); try { document.execCommand("copy"); } catch (e) {} a.remove(); }
+
+  /* ---------- data layer: shared Supabase database ---------- */
+  var sb = window.supabase.createClient("https://wdfavbffnxuysempllsf.supabase.co", "sb_publishable_K7ywEfAXdgEOJqMWZJ1rtA_L3FqWJhp", { auth: { flowType: "pkce", detectSessionInUrl: true, persistSession: true } });
+  var ME = null, MEMBERS = {};
+  var RAW = { people: [], orgs: [], person_orgs: [], interactions: [], insights: [], tasks: [], drafts: [], reports: [], settings: [], members: [] };
+  var PEOPLE_COLS = { name: 1, track: 1, category: 1, direction: 1, title: 1, homepage: 1, work: 1, why: 1, email: 1, emailSource: "email_source",
+    verifiedAt: "verified_at", verify: 1, hold: 1, status: 1, rejectReason: "reject_reason", introducedBy: "introduced_by", ownerId: "owner_id",
+    sentAt: "sent_at", lastContactAt: "last_contact_at", wechat: 1, phone: 1, linkedin: 1 };
+  var ORG_COLS = { name: 1, type: 1, url: 1, customerType: "customer_type", stage: 1, about: 1, dataUse: "data_use", whyMatters: "why_matters", needs: 1, notes: 1, ownerId: "owner_id" };
+  var TABLES_OF = { contacts: ["people", "person_orgs", "drafts"], orgs: ["orgs"], events: ["interactions", "insights"], tasks: ["tasks"] };
+
+  function mapCols(patch, cols) {
+    var out = {};
+    Object.keys(patch).forEach(function (k) {
+      if (!cols[k]) return;
+      var v = patch[k];
+      if ((k === "sentAt" || k === "lastContactAt" || k === "verifiedAt") && !v) v = null;
+      out[cols[k] === 1 ? k : cols[k]] = v;
+    });
+    return out;
+  }
+  function must(res) { if (res.error) throw res.error; return res.data; }
+  function src() { return "web:" + (ME ? ME.name : "?"); }
+
+  function rebuild() {
+    S.orgs = {};
+    RAW.orgs.forEach(function (o) {
+      S.orgs[o.id] = { _id: o.id, name: o.name, type: o.type, url: o.url, customerType: o.customer_type, stage: o.stage || "", about: o.about, dataUse: o.data_use,
+        whyMatters: o.why_matters, needs: o.needs, notes: o.notes, ownerId: o.owner_id };
+    });
+    var links = {}; RAW.person_orgs.forEach(function (l) { (links[l.person_id] = links[l.person_id] || []).push(l.org_id); });
+    var drafts = {}; RAW.drafts.forEach(function (d) { if (!d.sent) drafts[d.person_id] = d; });
+    S.contacts = {};
+    RAW.people.forEach(function (p) {
+      var d = drafts[p.id];
+      S.contacts[p.id] = { _id: p.id, name: p.name, track: p.track, category: p.category, direction: p.direction, title: p.title, homepage: p.homepage, work: p.work || [],
+        why: p.why, email: p.email, emailSource: p.email_source, verifiedAt: p.verified_at || "", verify: p.verify, hold: p.hold, status: p.status,
+        rejectReason: p.reject_reason, introducedBy: p.introduced_by, ownerId: p.owner_id, sentAt: p.sent_at || "", lastContactAt: p.last_contact_at || "",
+        orgIds: links[p.id] || [], draft: d ? { kind: d.kind, subject: d.subject, body: d.body, ready: d.ready, gmailDraftId: d.gmail_draft_id, original: d.original, _rid: d.id } : null };
+    });
+    var ins = {};
+    RAW.insights.forEach(function (i) { if (i.interaction_id) (ins[i.interaction_id] = ins[i.interaction_id] || []).push({ topic: i.topic, text: i.text }); });
+    S.events = {};
+    RAW.interactions.forEach(function (e) {
+      S.events[e.id] = { _id: e.id, orgIds: e.org_ids || [], contactIds: e.person_ids || [], type: e.kind || (e.channel === "meeting" ? "meeting" : "note"), channel: e.channel,
+        date: String(e.occurred_at).slice(0, 10), title: e.title, summary: e.summary, insights: ins[e.id] || [], seen: e.direction !== "in" || e.handled,
+        memberId: e.member_id, createdAt: e.created_at };
+    });
+    RAW.insights.forEach(function (i) {
+      if (i.interaction_id) return;
+      S.events["ins-" + i.id] = { _id: "ins-" + i.id, orgIds: i.org_ids || [], contactIds: i.person_ids || [], type: "note", date: String(i.created_at).slice(0, 10),
+        title: "洞察", summary: "", insights: [{ topic: i.topic, text: i.text }], seen: true };
+    });
+    S.tasks = {};
+    RAW.tasks.forEach(function (t) {
+      S.tasks[t.id] = { _id: t.id, orgId: t.org_id, contactId: t.person_id, kind: t.kind, text: t.text, due: t.due || "", owner: t.owner_id || "them", done: t.done };
+    });
+    S.reports = {};
+    RAW.reports.forEach(function (r) { S.reports[r.id] = { _id: r.id, date: r.date, title: r.title, markdown: r.markdown }; });
+    var setting = {}; RAW.settings.forEach(function (s) { setting[s.key] = s.value; });
+    S.sender = (ME && setting["sender:" + ME.id]) || setting.sender || {};
+    S.insightSum = setting.insights || {};
+    MEMBERS = {}; OWNER = { them: "对方" };
+    RAW.members.forEach(function (m) { MEMBERS[m.id] = m; OWNER[m.id] = m.name; });
+  }
+
+  var loading = {};
+  function refresh(tables) {
+    return Promise.all(tables.map(function (t) {
+      if (loading[t]) return loading[t];
+      loading[t] = sb.from(t).select("*").then(function (res) { loading[t] = null; RAW[t] = must(res) || []; });
+      return loading[t];
+    })).then(function () { rebuild(); render(); });
+  }
+
+  function doWrite(coll, id, patch, isNew) {
+    if (coll === "contacts") {
+      var row = mapCols(patch, PEOPLE_COLS), jobs = [];
+      if (isNew) { row.id = id; row.owner_id = row.owner_id || ME.id; row.source = src(); jobs.push(sb.from("people").insert(row).then(must)); }
+      else if (Object.keys(row).length) jobs.push(sb.from("people").update(row).eq("id", id).then(must));
+      return Promise.all(jobs).then(function () {
+        var next = [];
+        if (patch.orgIds) {
+          next.push(sb.from("person_orgs").delete().eq("person_id", id).then(must).then(function () {
+            return patch.orgIds.length ? sb.from("person_orgs").insert(patch.orgIds.map(function (o) { return { person_id: id, org_id: o }; })).then(must) : null;
+          }));
+        }
+        if ("draft" in patch) {
+          var cur = S.contacts[id] && S.contacts[id].draft;
+          if (!patch.draft) { if (cur) next.push(sb.from("drafts").update({ sent: true }).eq("id", cur._rid).then(must)); }
+          else {
+            var d = { kind: patch.draft.kind || "first", subject: patch.draft.subject || "", body: patch.draft.body || "", ready: !!patch.draft.ready };
+            if (cur) next.push(sb.from("drafts").update(d).eq("id", cur._rid).then(must));
+            else { d.person_id = id; d.sender_id = ME.id; d.original = { subject: d.subject, body: d.body }; next.push(sb.from("drafts").insert(d).then(must)); }
+          }
+        }
+        return Promise.all(next);
+      });
+    }
+    if (coll === "orgs") {
+      var o = mapCols(patch, ORG_COLS);
+      if (isNew) { o.id = id; o.owner_id = o.owner_id || ME.id; o.source = src(); return sb.from("orgs").insert(o).then(must); }
+      return sb.from("orgs").update(o).eq("id", id).then(must);
+    }
+    if (coll === "events") {
+      if (!isNew) return sb.from("interactions").update({ handled: !!patch.seen }).eq("id", id).then(must);
+      var ty = patch.type || "note";
+      return sb.from("interactions").insert({ occurred_at: patch.date || ymd(), channel: ty === "meeting" ? "meeting" : ty.indexOf("email") === 0 ? "email" : "note",
+        direction: ty === "email_received" ? "in" : ty === "email_sent" ? "out" : "internal", kind: ty, title: patch.title || "", summary: patch.summary || "",
+        person_ids: patch.contactIds || [], org_ids: patch.orgIds || [], member_id: ME.id, handled: !!patch.seen, source: src() }).then(must);
+    }
+    if (coll === "tasks") {
+      if (!isNew) return sb.from("tasks").update({ done: !!patch.done, done_at: patch.done ? now() : null }).eq("id", id).then(must);
+      return sb.from("tasks").insert({ org_id: patch.orgId, person_id: patch.contactId || null, kind: patch.kind, text: patch.text, due: patch.due || null,
+        owner_id: MEMBERS[patch.owner] ? patch.owner : null, done: false, source: src() }).then(must);
+    }
+    return Promise.reject(new Error("unknown collection " + coll));
+  }
+
+  var chains = {};
+  function write(coll, id, patch, isNew) {
+    if (!ME || !S.canWrite) { toast("只读模式：修改不会保存"); return Promise.resolve(false); }
+    var key = coll + "/" + id;
+    var p = (chains[key] || Promise.resolve()).then(function () { return doWrite(coll, id, patch, isNew); })
+      .then(function () { return refresh(TABLES_OF[coll]).then(function () { return true; }); }, function (err) {
+        console.error(err);
+        if (err && (err.code === "42501" || /row-level security/i.test(err.message || ""))) setReadOnly();
+        else toast("保存失败：" + ((err && err.message) || "请稍后再试"));
+        return false;
+      });
+    chains[key] = p; return p;
+  }
+  function saveSender(v) {
+    if (!ME || !S.canWrite) { toast("只读模式：修改不会保存"); return; }
+    sb.from("settings").upsert({ key: "sender:" + ME.id, value: v }).then(must).then(function () { toast("已保存"); try { $("dlg-settings").close(); } catch (e) {} return refresh(["settings"]); }, function (e) { toast("保存失败：" + e.message); });
+  }
+  function saveFile(name, text) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }
+  function newId(prefix) { return prefix + "-" + ymd().replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 8); }
+  var deb = {};
+  function later(key, fn) { clearTimeout(deb[key]); deb[key] = setTimeout(fn, 700); }
+  function setReadOnly() {
+    if (!S.canWrite) return;
+    S.canWrite = false; $("ro-pill").hidden = false; document.body.classList.add("ro");
+    notice("只读模式：你可以查看所有内容，但不能修改。"); render();
+  }
+
+  /* ---------- derived ---------- */
+  function orgName(id) { return (S.orgs[id] && S.orgs[id].name) || id; }
+  function catOf(c) { return c.track === "customer" ? "customer" : c.category; }
+  function live(c) { return c.status !== "archived"; }
+  function peopleOf(oid) { return vals(S.contacts).filter(function (c) { return (c.orgIds || []).indexOf(oid) >= 0 && live(c); }); }
+  function eventsOf(oid, cid) {
+    return vals(S.events).filter(function (e) { return cid ? (e.contactIds || []).indexOf(cid) >= 0 : (e.orgIds || []).indexOf(oid) >= 0; })
+      .sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+  }
+  function tasksOf(oid) { return vals(S.tasks).filter(function (t) { return t.orgId === oid; }).sort(function (a, b) { return String(a.due || "9").localeCompare(String(b.due || "9")); }); }
+  function lastActivity(oid) {
+    var d = "";
+    eventsOf(oid).forEach(function (e) { if (e.date > d) d = e.date; });
+    peopleOf(oid).forEach(function (c) { var x = c.lastContactAt || c.sentAt || ""; if (x > d) d = x; });
+    return d;
+  }
+  function chipStatus(s) {
+    var cls = s === "to_confirm" ? "warn" : (s === "replied" || s === "talked" || s === "keep_in_touch") ? "ok" : s === "sent" ? "info" : s === "confirmed" ? "accent" : "";
+    return '<span class="chip ' + cls + '">' + esc(STATUS[s] || s || "—") + "</span>";
+  }
+  var REACHED = { sent: 1, replied: 1, talked: 1, keep_in_touch: 1, closed: 1, do_not_contact: 1 };
+  var REPLIED = { replied: 1, talked: 1, keep_in_touch: 1 };
+  function reached(c) { return !!(REACHED[c.status] || c.sentAt); }
+  function repliedC(c) { return !!REPLIED[c.status] || vals(S.events).some(function (e) { return e.type === "email_received" && (e.contactIds || []).indexOf(c._id) >= 0; }); }
+  function dueItems() {
+    var out = [];
+    vals(S.tasks).forEach(function (t) { if (!t.done && t.due && t.due <= ymd()) out.push({ type: "task", t: t }); });
+    vals(S.contacts).forEach(function (c) { if (c.status === "sent" && daysAgo(c.sentAt) >= 7 && !(c.draft && c.draft.body)) out.push({ type: "followup", c: c }); });
+    Object.keys(S.orgs).forEach(function (oid) {
+      var talked = peopleOf(oid).some(function (c) { return c.status === "talked" || c.status === "keep_in_touch"; });
+      var la = lastActivity(oid);
+      if (talked && la && daysAgo(la) >= 60) out.push({ type: "checkin", oid: oid, days: daysAgo(la) });
+    });
+    return out;
+  }
+
+  /* ---------- routing ---------- */
+  function go(p) {
+    if (PAGES.indexOf(p) < 0) p = "overview";
+    S.page = p;
+    PAGES.forEach(function (x) { $("page-" + x).hidden = x !== p; });
+    document.querySelectorAll(".nav a.item").forEach(function (a) { if (a.dataset.page === p) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    renderPage();
+  }
+  window.addEventListener("hashchange", function () { go(location.hash.slice(1)); });
+  function openOrg(oid) { S.selOrg = oid; if (location.hash !== "#orgs") location.hash = "orgs"; else renderPage(); }
+  function openPerson(cid) { S.selPerson = cid; if (location.hash !== "#people") location.hash = "people"; else renderPage(); }
+  document.addEventListener("click", function (e) {
+    var o = e.target.closest("[data-open-org]"); if (o && o.dataset.openOrg) { e.preventDefault(); openOrg(o.dataset.openOrg); return; }
+    var p = e.target.closest("[data-open-person]"); if (p && p.dataset.openPerson) { e.preventDefault(); openPerson(p.dataset.openPerson); }
+  });
+
+  /* ---------- OVERVIEW ---------- */
+  function renderOverview() {
+    var cs = vals(S.contacts).filter(live);
+    var listed = cs.filter(function (c) { return c.status !== "rejected"; });
+    var confirmed = listed.filter(function (c) { return c.status !== "to_confirm"; });
+    var sent = cs.filter(reached), replied = cs.filter(repliedC);
+    var talked = cs.filter(function (c) { return c.status === "talked" || c.status === "keep_in_touch" || eventsOf(null, c._id).some(function (e) { return e.type === "meeting"; }); });
+    var rate = sent.length ? Math.round(100 * replied.length / sent.length) + "%" : "—";
+    var weekAgo = ymd(new Date(Date.now() - 7 * 864e5));
+    var sentWeek = sent.filter(function (c) { return (c.sentAt || "") >= weekAgo; }).length;
+    var orgsTouched = Object.keys(S.orgs).filter(function (o) { return peopleOf(o).some(reached); }).length;
+    $("ov-date").textContent = ymd();
+    $("ov-kpis").innerHTML = [
+      [listed.length, "名单上的人", confirmed.length + " 人已确认"],
+      [orgsTouched, "联系过的机构", Object.keys(S.orgs).length + " 个机构在册"],
+      [sent.length, "已发邮件", "本周 " + sentWeek],
+      [replied.length, "回复", ""],
+      [talked.length, "聊过", ""],
+      [rate, "回复率", sent.length ? "回复 ÷ 已发" : "还没有发出的邮件"]
+    ].map(function (k) { return '<div class="kpi"><b>' + esc(k[0]) + "</b><span>" + esc(k[1]) + "</span><em>" + esc(k[2]) + "</em></div>"; }).join("");
+
+    var steps = [["名单", listed.length], ["已确认", confirmed.length], ["已发", sent.length], ["已回复", replied.length], ["已聊", talked.length]];
+    var top = Math.max(1, listed.length);
+    $("ov-funnel").innerHTML = steps.map(function (s, i) {
+      var prev = i ? steps[i - 1][1] : 0;
+      var conv = i && prev ? Math.round(100 * s[1] / prev) + "%" : "";
+      return '<div class="fstep"><span>' + s[0] + '</span><div class="fbar" role="img" aria-label="' + s[0] + " " + s[1] + '"><i style="width:' + (100 * s[1] / top).toFixed(1) + '%"></i></div><span class="v">' + s[1] + (conv ? "<small>" + conv + "</small>" : "") + "</span></div>";
+    }).join("");
+
+    var groups = {};
+    sent.forEach(function (c) {
+      var k = c.direction ? "研究者 · " + DIR[c.direction].slice(0, 1) : CAT[catOf(c)] || "其他";
+      var g = groups[k] || (groups[k] = { n: 0, r: 0 }); g.n++; if (repliedC(c)) g.r++;
+    });
+    var gk = Object.keys(groups).sort(function (a, b) { return groups[b].r / groups[b].n - groups[a].r / groups[a].n || groups[b].n - groups[a].n; });
+    $("ov-groups").innerHTML = gk.length ? gk.map(function (k) {
+      var g = groups[k], pct = Math.round(100 * g.r / g.n);
+      return '<div class="brow"><span>' + esc(k) + '</span><div class="track"><i style="width:' + pct + '%"></i></div><span class="v">' + pct + "% · " + g.n + "</span></div>";
+    }).join("") : '<div class="empty">发出第一批邮件后，这里会显示各类人的回复率。</div>';
+
+    renderWeeks();
+
+    var corgs = Object.keys(S.orgs).filter(function (o) { return S.orgs[o].customerType; });
+    $("ov-stages").innerHTML = STAGES.map(function (st) {
+      var n = corgs.filter(function (o) { return (S.orgs[o].stage || "") === st[0]; }).length;
+      return '<div class="stage-n"><b>' + n + "</b><span>" + st[1] + "</span></div>";
+    }).join("");
+
+    var evs = vals(S.events).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")); }).slice(0, 8);
+    $("ov-feed").innerHTML = evs.length ? evs.map(function (e) {
+      return '<li><span class="d">' + esc(String(e.date).slice(5)) + '</span><span><span class="chip">' + esc(EVTYPE[e.type] || e.type) + "</span> " + esc(e.title || "") +
+        ((e.orgIds || [])[0] ? ' · <a href="#orgs" data-open-org="' + esc(e.orgIds[0]) + '">' + esc(orgName(e.orgIds[0])) + "</a>" : "") + "</span></li>";
+    }).join("") : '<li class="empty" style="display:block">还没有往来记录。发出邮件、收到回复、开完会后会出现在这里。</li>';
+
+    var open = vals(S.tasks).filter(function (t) { return !t.done && t.due && t.due <= ymd(new Date(Date.now() + 7 * 864e5)); }).sort(function (a, b) { return a.due.localeCompare(b.due); }).slice(0, 8);
+    $("ov-due").innerHTML = open.length ? open.map(function (t) {
+      var late = t.due < ymd();
+      return '<li><span class="d"' + (late ? ' style="color:var(--warn)"' : "") + ">" + esc(t.due.slice(5)) + (late ? " 逾期" : "") + '</span><span><span class="chip">' + esc(TASK_KIND[t.kind] || t.kind) + "</span> " + esc(t.text) +
+        ' · <a href="#orgs" data-open-org="' + esc(t.orgId) + '">' + esc(orgName(t.orgId)) + "</a></span></li>";
+    }).join("") : '<li class="empty" style="display:block">未来 7 天没有到期的承诺。</li>';
+
+    var rs = sortedReports();
+    $("ov-report").innerHTML = rs.length ? '<div class="row" style="justify-content:space-between"><b>' + esc(rs[0].title || rs[0]._id) + '</b><a href="#reports" class="btn">打开</a></div><p class="hint" style="margin:6px 0 0">' + esc(firstLine(rs[0].markdown)) + "</p>"
+      : '<div class="empty">第一份周报会在下周一生成。</div>';
+  }
+  function renderWeeks() {
+    var W = 8, weeks = [], start = new Date(); start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7) - 7 * (W - 1));
+    for (var i = 0; i < W; i++) { var d = new Date(start); d.setDate(d.getDate() + 7 * i); weeks.push({ from: ymd(d), sent: 0, rep: 0, meet: 0 }); }
+    function idx(date) { for (var j = W - 1; j >= 0; j--) if (date >= weeks[j].from) return j; return -1; }
+    vals(S.contacts).forEach(function (c) { if (c.sentAt) { var j = idx(c.sentAt.slice(0, 10)); if (j >= 0) weeks[j].sent++; } });
+    vals(S.events).forEach(function (e) {
+      var j = idx(String(e.date).slice(0, 10)); if (j < 0) return;
+      if (e.type === "email_received") weeks[j].rep++; if (e.type === "meeting") weeks[j].meet++;
+    });
+    var max = Math.max(4, Math.max.apply(null, weeks.map(function (w) { return Math.max(w.sent, w.rep, w.meet); })));
+    var nice = Math.ceil(max / 4) * 4;
+    var Wd = 640, H = 200, L = 32, B = 26, T = 8, cw = (Wd - L) / W, bw = Math.min(14, (cw - 12) / 3);
+    var y = function (v) { return T + (H - T - B) * (1 - v / nice); };
+    var g = "";
+    for (var k = 0; k <= 4; k++) {
+      var v = nice * k / 4, yy = y(v);
+      g += '<line x1="' + L + '" x2="' + Wd + '" y1="' + yy + '" y2="' + yy + '" stroke="var(--line)" stroke-width="1"/>' +
+        '<text x="' + (L - 6) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">' + v + "</text>";
+    }
+    weeks.forEach(function (w, i) {
+      var x0 = L + i * cw + (cw - bw * 3 - 4) / 2;
+      [["sent", "var(--s1)"], ["rep", "var(--s2)"], ["meet", "var(--s3)"]].forEach(function (s, j) {
+        var v = w[s[0]], h = y(0) - y(v);
+        if (v) g += '<rect x="' + (x0 + j * (bw + 2)).toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + s[1] + '"><title>' + w.from + " · " + v + "</title></rect>";
+      });
+      g += '<text x="' + (L + i * cw + cw / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">' + w.from.slice(5) + "</text>";
+    });
+    var any = weeks.some(function (w) { return w.sent || w.rep || w.meet; });
+    $("ov-weeks").innerHTML = '<svg viewBox="0 0 ' + Wd + " " + H + '" role="img" aria-label="最近 8 周的发出、回复和会议数">' + g + "</svg>" + (any ? "" : '<p class="hint" style="margin:6px 0 0">还没有数据。每周一的日期是这一周的开始。</p>');
+  }
+
+  /* ---------- TODAY ---------- */
+  function editorHtml(c) {
+    var d = c.draft || {}, ro = S.canWrite ? "" : " readonly";
+    return '<div class="editor" data-cid="' + esc(c._id) + '">' +
+      '<div class="row"><span class="chip info">' + esc(KIND[d.kind] || "邮件") + '</span><span class="hint">收件人：' + (c.email ? '<span class="mono">' + esc(c.email) + "</span>" : '<span class="chip warn">邮箱待找</span> ' + esc(c.emailSource || "")) + "</span></div>" +
+      '<div class="field"><label>主题</label><input data-f="subject" value="' + esc(d.subject) + '"' + ro + "></div>" +
+      '<div class="field"><label>正文（签名会自动加上）</label><textarea data-f="body" rows="9"' + ro + ">" + esc(d.body) + "</textarea></div>" +
+      '<div class="preview" data-preview></div>' +
+      '<div class="actions">' +
+      (d.ready ? '<span class="chip ok">已确认' + (d.gmailDraftId ? "，已在 Gmail 草稿箱" : "，等 Agent 放进 Gmail") + "</span>" : (S.canWrite ? '<button class="btn primary" data-act="ready" type="button">好了</button>' : "")) +
+      '<button class="btn" data-act="copy-s" type="button">复制主题</button><button class="btn" data-act="copy-b" type="button">复制正文</button>' +
+      (S.canWrite ? '<button class="btn" data-act="sent" type="button">我已发送</button>' : "") + '<span class="hint" data-state></span></div>' +
+      '<div class="hint" data-confirm hidden></div></div>';
+  }
+  function bindEditors(root) {
+    root.querySelectorAll(".editor").forEach(function (ed) {
+      var cid = ed.dataset.cid;
+      var subj = ed.querySelector('[data-f="subject"]'), body = ed.querySelector('[data-f="body"]');
+      var prev = ed.querySelector("[data-preview]"), st = ed.querySelector("[data-state]");
+      function upd() { prev.innerHTML = "<b>Subject:</b> " + marked(fill(subj.value)) + "\n\n" + marked(full(body.value)); }
+      upd();
+      [subj, body].forEach(function (el) {
+        el.addEventListener("input", function () {
+          upd(); st.textContent = "正在保存…";
+          later("d:" + cid, function () {
+            var d = Object.assign({}, S.contacts[cid].draft || {}, { subject: subj.value, body: body.value });
+            write("contacts", cid, { draft: d }).then(function (ok) { st.textContent = ok ? "已保存" : ""; });
+          });
+        });
+      });
+      ed.addEventListener("click", function (e) {
+        var a = e.target.dataset && e.target.dataset.act; if (!a) return;
+        var cur = S.contacts[cid];
+        if (a === "copy-s") copy(fill(subj.value), "主题");
+        if (a === "copy-b") copy(full(body.value), "正文");
+        if (a === "ready") {
+          write("contacts", cid, { draft: Object.assign({}, cur.draft || {}, { subject: subj.value, body: body.value, ready: true, readyAt: now() }) })
+            .then(function (ok) { if (ok) toast("好了。Agent 会把它放进 Gmail 草稿箱"); });
+        }
+        if (a === "sent" || a === "sent-confirm") {
+          var sentToday = vals(S.contacts).filter(function (x) { return String(x.sentAt || "").slice(0, 10) === ymd(); }).length;
+          var box = ed.querySelector("[data-confirm]");
+          if (a === "sent" && sentToday >= DAILY_CAP) {
+            box.hidden = false;
+            box.innerHTML = "今天已经发了 " + sentToday + " 封（新邮箱建议每天不超过 " + DAILY_CAP + " 封）。 <button class=\"btn danger\" data-act=\"sent-confirm\" type=\"button\">仍然记为已发送</button>";
+            return;
+          }
+          var d2 = cur.draft || {};
+          write("events", newId("e"), { orgIds: cur.orgIds || [], contactIds: [cid], type: "email_sent", date: ymd(), title: "发给 " + cur.name + "：" + fill(subj.value),
+            summary: (KIND[d2.kind] || "邮件") + "，Stella 手动发送", seen: true, sentCopy: { subject: fill(subj.value), body: full(body.value), original: d2.original || null } }, true);
+          var patch = { draft: null, lastContactAt: ymd() };
+          if (["confirmed", "to_confirm"].indexOf(cur.status) >= 0) { patch.status = "sent"; patch.sentAt = ymd(); }
+          write("contacts", cid, patch).then(function (ok) { if (ok) toast("已记为发送"); });
+        }
+      });
+    });
+  }
+  function personLine(c) {
+    var bits = '<span class="chip' + (c.track === "customer" ? " gold" : "") + '">' + esc(CAT[catOf(c)] || "—") + "</span>" + (c.direction ? '<span class="chip">' + esc(DIR[c.direction]) + "</span>" : "");
+    return '<div class="row"><a href="#people" class="name" data-open-person="' + esc(c._id) + '">' + esc(c.name) + "</a>" + bits + "</div>" +
+      '<div class="sub">' + esc(c.title || "") + ((c.orgIds || []).length ? " · " + c.orgIds.map(orgName).map(esc).join("、") : "") + "</div>";
+  }
+  function queue(id, title, sub, items, emptyText) {
+    $(id).innerHTML = "<header><h2>" + title + ' <span class="sub">' + sub + '</span></h2><span class="num hint">' + items.length + "</span></header>" +
+      (items.length ? items.join("") : '<div class="empty">' + emptyText + "</div>");
+  }
+  function renderToday() {
+    var cs = vals(S.contacts);
+    var conf = cs.filter(function (c) { return c.status === "to_confirm"; });
+    queue("q-confirm", "待你确认的人", "Agent 找到的新人，确认后它会写邮件", conf.map(function (c) {
+      var work = (c.work || []).map(function (w) { return '<a href="' + esc(w.url) + '" target="_blank" rel="noopener">' + esc(w.label || w.url) + "</a>"; }).join(" · ");
+      return '<div class="qitem" data-cid="' + esc(c._id) + '">' + personLine(c) + (c.why ? '<div class="why">' + esc(c.why) + "</div>" : "") + (work ? '<div class="sub">' + work + "</div>" : "") +
+        (c.hold ? '<div><span class="chip warn">' + esc(c.hold) + "</span></div>" : "") + (c.verify ? '<div class="sub">待核实：' + esc(c.verify) + "</div>" : "") +
+        (S.canWrite ? '<div class="actions"><button class="btn primary" data-act="confirm" type="button">确认</button><select class="inp" data-reject style="width:auto" aria-label="不要的原因"><option value="">不要，原因…</option>' +
+          REJECT.map(function (r) { return "<option>" + r + "</option>"; }).join("") + "</select></div>" : "") + "</div>";
+    }), "没有待确认的人。");
+    var edits = cs.filter(function (c) { return c.draft && c.draft.body && !c.draft.ready; });
+    var editItems = [];
+    ["researcher", "engineer", "market", "customer"].forEach(function (k) {
+      var group = edits.filter(function (c) { return catOf(c) === k; })
+        .sort(function (a, b) { return String(a.direction || "9").localeCompare(String(b.direction || "9")) || a.name.localeCompare(b.name); });
+      if (!group.length) return;
+      editItems.push('<div class="qgroup">' + esc(CAT[k]) + " · " + group.length + "</div>");
+      group.forEach(function (c) {
+        var open = S.open["e:" + c._id];
+        editItems.push('<div class="qitem">' + personLine(c) + '<div class="row"><span class="chip info">' + esc(KIND[c.draft.kind] || "邮件") + '</span><span class="sub">' + esc(fill(c.draft.subject)) + "</span>" +
+          '<button class="btn" data-toggle="e:' + esc(c._id) + '" type="button" style="margin-left:auto">' + (open ? "收起" : "打开") + "</button></div>" + (open ? editorHtml(c) : "") + "</div>");
+      });
+    });
+    queue("q-edit", "待你改的邮件", "按类别分组。改好点“好了”，Agent 会放进 Gmail 草稿箱", editItems, "没有要你改的邮件。");
+    $("q-edit").querySelector(".num").textContent = edits.length;
+    var reps = vals(S.events).filter(function (e) { return e.type === "email_received" && !e.seen; }).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+    queue("q-replies", "新回复", "Agent 已经写好回复建议，放在“待你改的邮件”里", reps.map(function (e) {
+      return '<div class="qitem" data-eid="' + esc(e._id) + '"><div class="row"><span class="name">' + esc(e.title) + '</span><span class="hint mono">' + esc(e.date) + "</span></div>" +
+        '<div class="sub">' + (e.orgIds || []).map(orgName).map(esc).join("、") + "</div>" + (e.summary ? '<div class="why">' + esc(e.summary) + "</div>" : "") +
+        '<div class="actions">' + (S.canWrite ? '<button class="btn" data-act="seen" type="button">看过了</button>' : "") + '<button class="btn" data-open-org="' + esc((e.orgIds || [])[0] || "") + '" type="button">打开机构</button></div></div>';
+    }), "没有新回复。");
+    var ds = dueItems();
+    queue("q-due", "到期的事", "下一步、承诺、该跟进和该问候的", ds.map(function (x) {
+      if (x.type === "task") {
+        var t = x.t;
+        return '<div class="qitem" data-tid="' + esc(t._id) + '"><div class="row"><span class="chip ' + (t.due < ymd() ? "warn" : "") + '">' + esc(t.due) + '</span><span class="chip">' + esc(TASK_KIND[t.kind] || t.kind) + '</span><span class="sub">' + esc(OWNER[t.owner] || "") + " · " + esc(orgName(t.orgId)) + "</span></div>" +
+          '<div class="why">' + esc(t.text) + '</div><div class="actions">' + (S.canWrite ? '<button class="btn" data-act="done" type="button">完成</button>' : "") + '<button class="btn" data-open-org="' + esc(t.orgId) + '" type="button">打开机构</button></div></div>';
+      }
+      if (x.type === "followup") return '<div class="qitem"><div class="row"><span class="chip info">跟进</span><a href="#people" class="name" data-open-person="' + esc(x.c._id) + '">' + esc(x.c.name) + '</a></div><div class="sub">发出 ' + daysAgo(x.c.sentAt) + " 天，还没回复。Agent 下次运行会写好跟进邮件。</div></div>";
+      return '<div class="qitem"><div class="row"><span class="chip gold">问候</span><span class="name">' + esc(orgName(x.oid)) + '</span></div><div class="sub">' + x.days + ' 天没联系了。Agent 会准备一封近况邮件。</div><div class="actions"><button class="btn" data-open-org="' + esc(x.oid) + '" type="button">打开机构</button></div></div>';
+    }), "没有到期的事。");
+    var waiting = cs.filter(function (c) { return c.status === "confirmed" && !(c.draft && c.draft.body); }).length;
+    var sentToday = cs.filter(function (c) { return String(c.sentAt || "").slice(0, 10) === ymd(); }).length;
+    $("td-sub").textContent = ymd() + " · 今天已发 " + sentToday + "/" + DAILY_CAP + (waiting ? " · " + waiting + " 人已确认，等 Agent 写邮件" : "");
+    bindEditors($("page-today"));
+  }
+  $("page-today").addEventListener("click", function (e) {
+    var b = e.target;
+    if (b.dataset.toggle) { S.open[b.dataset.toggle] = !S.open[b.dataset.toggle]; renderToday(); return; }
+    var it = b.closest(".qitem"); if (!it) return;
+    if (b.dataset.act === "confirm") write("contacts", it.dataset.cid, { status: "confirmed", confirmedAt: now() }).then(function (ok) { if (ok) toast("已确认"); });
+    if (b.dataset.act === "seen") write("events", it.dataset.eid, { seen: true });
+    if (b.dataset.act === "done") write("tasks", it.dataset.tid, { done: true, doneAt: now() }).then(function (ok) { if (ok) toast("已完成"); });
+  });
+  $("page-today").addEventListener("change", function (e) {
+    if (!e.target.hasAttribute("data-reject") || !e.target.value) return;
+    write("contacts", e.target.closest(".qitem").dataset.cid, { status: "rejected", rejectReason: e.target.value, rejectedAt: now() }).then(function (ok) { if (ok) toast("已移出，Agent 会记住原因"); });
+  });
+
+  /* ---------- CUSTOMERS ---------- */
+  function renderCustomers() {
+    $("cu-drag").hidden = !S.canWrite;
+    var corgs = Object.keys(S.orgs).filter(function (o) { return S.orgs[o].customerType; });
+    $("kanban").innerHTML = STAGES.map(function (st) {
+      var os = corgs.filter(function (o) { return (S.orgs[o].stage || "") === st[0]; }).sort(function (a, b) { return String(lastActivity(b)).localeCompare(String(lastActivity(a))); });
+      return '<div class="col" data-stage="' + st[0] + '"><h3>' + st[1] + "<span>" + os.length + "</span></h3>" + os.map(function (o) {
+        var org = S.orgs[o], ps = peopleOf(o), la = lastActivity(o);
+        var lead = ps.slice().sort(function (a, b) { return Object.keys(STATUS).indexOf(b.status) - Object.keys(STATUS).indexOf(a.status); })[0];
+        var next = tasksOf(o).filter(function (t) { return !t.done; })[0];
+        return '<button class="kcard" type="button" data-open-org="' + esc(o) + '" data-org="' + esc(o) + '"' + (S.canWrite ? ' draggable="true"' : "") + '><span class="t">' + esc(org.name) + '</span><span class="s">' + esc(CTYPE[org.customerType] || "") + " · " + ps.length + " 人</span>" +
+          (lead ? '<span class="s">' + esc(lead.name) + " · " + esc(STATUS[lead.status] || "") + "</span>" : "") +
+          (next ? '<span class="s">下一步：' + esc(next.text) + "</span>" : "") + '<span class="s mono">' + (la ? "最近 " + esc(la.slice(0, 10)) : "还没联系") + "</span></button>";
+      }).join("") + (os.length ? "" : '<span class="hint">—</span>') + "</div>";
+    }).join("");
+  }
+  (function dnd() {
+    var k = $("kanban"), drag = null;
+    k.addEventListener("dragstart", function (e) { var c = e.target.closest(".kcard"); if (!c) return; drag = c.dataset.org; e.dataTransfer.setData("text/plain", drag); });
+    k.addEventListener("dragover", function (e) { var col = e.target.closest(".col"); if (!col || !drag) return; e.preventDefault(); k.querySelectorAll(".col.over").forEach(function (x) { x.classList.remove("over"); }); col.classList.add("over"); });
+    k.addEventListener("dragleave", function (e) { var col = e.target.closest(".col"); if (col && !col.contains(e.relatedTarget)) col.classList.remove("over"); });
+    k.addEventListener("drop", function (e) {
+      var col = e.target.closest(".col"); if (!col || !drag) return; e.preventDefault();
+      var stg = col.dataset.stage, oid = drag; drag = null; col.classList.remove("over");
+      if ((S.orgs[oid].stage || "") === stg) return;
+      write("orgs", oid, { stage: stg }).then(function (ok) { if (ok) toast(S.orgs[oid].name + " → " + (STAGES.filter(function (s) { return s[0] === stg; })[0][1])); });
+    });
+    k.addEventListener("dragend", function () { drag = null; k.querySelectorAll(".col.over").forEach(function (x) { x.classList.remove("over"); }); });
+  })();
+
+  /* ---------- INSIGHTS ---------- */
+  function renderInsights() {
+    var f = S.ins, all = [];
+    vals(S.events).forEach(function (e) {
+      (e.insights || []).forEach(function (i) {
+        var people = (e.contactIds || []).map(function (id) { return S.contacts[id]; }).filter(Boolean);
+        if (f.cat !== "all" && !people.some(function (c) { return catOf(c) === f.cat; })) return;
+        var hay = (i.text + " " + (e.orgIds || []).map(orgName).join(" ") + " " + people.map(function (c) { return c.name; }).join(" ")).toLowerCase();
+        if (f.q && hay.indexOf(f.q.toLowerCase()) < 0) return;
+        all.push({ topic: i.topic, text: i.text, date: e.date, orgs: e.orgIds || [], people: people });
+      });
+    });
+    $("ins-cols").innerHTML = TOPICS.map(function (tp) {
+      var items = all.filter(function (x) { return x.topic === tp[0]; }).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+      var sum = S.insightSum[tp[0]];
+      return '<div class="panel"><header><h2>' + tp[1] + '</h2><span class="num hint">' + items.length + " 条</span></header><div class=\"body\" style=\"display:grid;gap:12px\">" +
+        (sum && sum.summary ? '<div class="ins-sum"><div class="label" style="margin-bottom:4px">目前的认识</div>' + esc(sum.summary) + (sum.updatedAt ? '<div class="hint" style="margin-top:4px">Agent 更新于 ' + esc(String(sum.updatedAt).slice(0, 10)) + "</div>" : "") + "</div>" : "") +
+        (items.length ? '<ul class="ins-list">' + items.map(function (x) {
+          return "<li>" + esc(x.text) + '<div class="src">' + esc(x.date) + " · " + x.people.map(function (c) { return '<a href="#people" data-open-person="' + esc(c._id) + '">' + esc(c.name) + "</a>"; }).join("、") +
+            (x.orgs[0] ? ' · <a href="#orgs" data-open-org="' + esc(x.orgs[0]) + '">' + esc(orgName(x.orgs[0])) + "</a>" : "") + "</div></li>";
+        }).join("") + "</ul>" : '<div class="empty">还没有。每次聊完，Agent 会把相关的话归到这里。</div>') + "</div></div>";
+    }).join("");
+  }
+  $("in-cat").addEventListener("change", function (e) { S.ins.cat = e.target.value; renderInsights(); });
+  $("in-q").addEventListener("input", function (e) { S.ins.q = e.target.value; renderInsights(); });
+
+  /* ---------- REPORTS ---------- */
+  function sortedReports() { return vals(S.reports).sort(function (a, b) { return String(b.date || b._id).localeCompare(String(a.date || a._id)); }); }
+  function firstLine(md) { var m = String(md || "").split("\n").filter(function (l) { return l.trim() && !/^#|^\|/.test(l.trim()); }); return (m[0] || "").replace(/\*\*/g, "").slice(0, 160); }
+  function mdToHtml(md) {
+    var lines = String(md || "").split("\n"), out = [], i = 0;
+    function inl(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>'); }
+    while (i < lines.length) {
+      var l = lines[i];
+      if (/^#{1,3} /.test(l)) { var n = l.match(/^#+/)[0].length; out.push("<h" + n + ">" + inl(l.replace(/^#+ /, "")) + "</h" + n + ">"); i++; continue; }
+      if (/^\s*\|/.test(l)) {
+        var rows = []; while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(lines[i]); i++; }
+        var cells = rows.filter(function (r) { return !/^\s*\|[\s|:-]+\|\s*$/.test(r); }).map(function (r) { return r.trim().replace(/^\||\|$/g, "").split("|").map(function (c) { return c.trim(); }); });
+        out.push('<div class="tbl"><table><thead><tr>' + cells[0].map(function (c) { return "<th>" + inl(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          cells.slice(1).map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + inl(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>");
+        continue;
+      }
+      if (/^\s*[-*] /.test(l)) { var items = []; while (i < lines.length && /^\s*[-*] /.test(lines[i])) { items.push("<li>" + inl(lines[i].replace(/^\s*[-*] /, "")) + "</li>"); i++; } out.push("<ul>" + items.join("") + "</ul>"); continue; }
+      if (l.trim()) out.push("<p>" + inl(l) + "</p>");
+      i++;
+    }
+    return out.join("");
+  }
+  function renderReports() {
+    var rs = sortedReports();
+    if (!S.selReport && rs[0]) S.selReport = rs[0]._id;
+    $("rp-rail").innerHTML = rs.length ? rs.map(function (r) {
+      return '<button class="card" type="button" data-report="' + esc(r._id) + '"' + (S.selReport === r._id ? ' aria-current="true"' : "") + '><span class="t">' + esc(r.title || r._id) + '</span><span class="s mono">' + esc(r.date || "") + "</span></button>";
+    }).join("") : '<div class="empty">还没有报告。</div>';
+    var r = S.reports[S.selReport];
+    $("rp-body").innerHTML = r ? mdToHtml(r.markdown) : '<div class="empty">Agent 每周一早上会写一份报告：按机构列出发生了什么、学到了什么、接下来做什么。</div>';
+  }
+  $("rp-rail").addEventListener("click", function (e) { var b = e.target.closest("[data-report]"); if (b) { S.selReport = b.dataset.report; renderReports(); } });
+
+  /* ---------- ORGS ---------- */
+  function renderOrgs() {
+    var f = S.og;
+    var ids = Object.keys(S.orgs).filter(function (o) {
+      var org = S.orgs[o];
+      if (!peopleOf(o).length && !org.customerType && !eventsOf(o).length) return false;
+      if (f.type !== "all" && org.type !== f.type) return false;
+      if (f.q && (org.name + " " + peopleOf(o).map(function (c) { return c.name; }).join(" ")).toLowerCase().indexOf(f.q.toLowerCase()) < 0) return false;
+      return true;
+    }).sort(function (a, b) { return String(lastActivity(b)).localeCompare(String(lastActivity(a))) || orgName(a).localeCompare(orgName(b)); });
+    var html = "";
+    ["company", "lab", "project"].forEach(function (ty) {
+      var os = ids.filter(function (o) { return S.orgs[o].type === ty; }); if (!os.length) return;
+      html += '<div class="group-h">' + OTYPE[ty] + " · " + os.length + "</div>";
+      os.forEach(function (o) {
+        var org = S.orgs[o], ps = peopleOf(o), la = lastActivity(o), next = tasksOf(o).filter(function (t) { return !t.done; })[0];
+        html += '<button class="card" type="button" data-org="' + esc(o) + '"' + (S.selOrg === o ? ' aria-current="true"' : "") + '><div class="row"><span class="t">' + esc(org.name) + "</span>" +
+          (org.customerType ? '<span class="chip gold">客户</span>' : "") + '<span class="chip">' + ps.length + ' 人</span></div><div class="s">' + (la ? "最近 " + esc(la.slice(0, 10)) : "还没联系") + (next ? " · 下一步：" + esc(next.text) : "") + "</div></button>";
+      });
+    });
+    $("og-rail").innerHTML = html || '<div class="empty">没有符合条件的机构。</div>';
+    renderOrgDetail();
+  }
+  $("og-rail").addEventListener("click", function (e) { var b = e.target.closest("[data-org]"); if (b) { S.selOrg = b.dataset.org; renderOrgs(); } });
+  $("og-type").addEventListener("change", function (e) { S.og.type = e.target.value; renderOrgs(); });
+  $("og-q").addEventListener("input", function (e) { S.og.q = e.target.value; renderOrgs(); });
+  function timelineHtml(evs) {
+    if (!evs.length) return '<div class="hint">还没有记录。</div>';
+    var nm = {}; TOPICS.forEach(function (t) { nm[t[0]] = t[1]; });
+    return '<ul class="tl">' + evs.map(function (e) {
+      var ins = (e.insights || []).map(function (i) { return "<li><b>" + esc(nm[i.topic] || i.topic) + "：</b>" + esc(i.text) + "</li>"; }).join("");
+      return '<li class="' + esc(e.type) + '"><div class="d">' + esc(e.date) + " · " + esc(EVTYPE[e.type] || e.type) + "</div><div><b>" + esc(e.title || "") + "</b></div>" +
+        (e.summary ? '<div class="hint">' + esc(e.summary) + "</div>" : "") + (ins ? '<ul class="ins">' + ins + "</ul>" : "") + "</li>";
+    }).join("") + "</ul>";
+  }
+  function tasksHtml(ts) {
+    if (!ts.length) return '<div class="hint">没有。</div>';
+    return '<div class="tasks">' + ts.map(function (t) {
+      return '<label class="task' + (t.done ? " done" : "") + '"><input type="checkbox" data-task="' + esc(t._id) + '"' + (t.done ? " checked" : "") + (S.canWrite ? "" : " disabled") + "><span>" +
+        '<span class="chip">' + esc(TASK_KIND[t.kind] || t.kind) + "</span> " + esc(t.text) + ' <span class="hint">' + esc(OWNER[t.owner] || "") + (t.due ? " · " + esc(t.due) : "") + "</span></span></label>";
+    }).join("") + "</div>";
+  }
+  function renderOrgDetail() {
+    var box = $("og-detail"), oid = S.selOrg, org = S.orgs[oid];
+    if (!org) { box.innerHTML = '<div class="empty">在左边选一个机构，看它的人、时间线、下一步和承诺。</div>'; return; }
+    var ps = peopleOf(oid), ts = tasksOf(oid), openTs = ts.filter(function (t) { return !t.done; }), doneTs = ts.filter(function (t) { return t.done; });
+    var ins = []; eventsOf(oid).forEach(function (e) { (e.insights || []).forEach(function (i) { ins.push(i); }); });
+    var tab = S.orgTab || "profile";
+    var TABS = '<div class="seg" role="tablist" aria-label="机构视图"><button type="button" role="tab" data-otab="profile" aria-selected="' + (tab === "profile") + '">概况</button><button type="button" role="tab" data-otab="records" aria-selected="' + (tab === "records") + '">全部记录</button></div>';
+    if (tab === "profile") { renderOrgProfile(box, oid, TABS, ps, openTs, ins); return; }
+    box.innerHTML = '<div class="body">' + TABS + '<div class="row" style="margin-top:12px"><h2>' + esc(org.name) + '</h2><span class="chip">' + esc(OTYPE[org.type] || "") + "</span>" + (org.url ? '<a href="' + esc(org.url) + '" target="_blank" rel="noopener">网站</a>' : "") + "</div>" +
+      (org.customerType ? '<div class="row" style="margin-top:8px"><span class="chip gold">客户 · ' + esc(CTYPE[org.customerType] || "") + '</span><label class="hint" for="o-stage">阶段</label><select class="inp" id="o-stage" style="width:auto"' + (S.canWrite ? "" : " disabled") + ">" +
+        STAGES.map(function (s) { return '<option value="' + s[0] + '"' + ((org.stage || "") === s[0] ? " selected" : "") + ">" + s[1] + "</option>"; }).join("") + "</select></div>" : "") +
+      (org.notes ? '<p class="hint">' + esc(org.notes) + "</p>" : "") +
+      '<div class="sec"><div class="label">这里的人 · ' + ps.length + '</div><div class="people">' + ps.map(function (c) {
+        return '<button class="person" type="button" data-open-person="' + esc(c._id) + '"><span><b>' + esc(c.name) + '</b> <span class="hint">' + esc(c.title || "") + "</span></span>" + chipStatus(c.status) + "</button>";
+      }).join("") + "</div></div>" +
+      '<div class="sec"><div class="label">下一步和承诺</div>' + tasksHtml(openTs) +
+      (S.canWrite ? '<form class="mini-form" id="f-task"><select class="inp" name="kind" aria-label="类型">' + Object.keys(TASK_KIND).map(function (k) { return '<option value="' + k + '">' + TASK_KIND[k] + "</option>"; }).join("") + '</select><select class="inp" name="owner" aria-label="谁来做">' + Object.keys(OWNER).map(function (k) { return '<option value="' + k + '">' + OWNER[k] + "</option>"; }).join("") + '</select><input class="inp" type="date" name="due" aria-label="到期日"><input class="inp wide" name="text" placeholder="例如：下周发 2 段样本视频" required aria-label="内容"><button class="btn" type="submit">加上</button></form>' : "") + "</div>" +
+      (ins.length ? '<div class="sec"><div class="label">学到的东西 · ' + ins.length + "</div>" + '<ul class="tl">' + ins.map(function (i) { var nm = TOPICS.filter(function (t) { return t[0] === i.topic; })[0]; return "<li><b>" + esc(nm ? nm[1] : i.topic) + "：</b>" + esc(i.text) + "</li>"; }).join("") + "</ul></div>" : "") +
+      '<div class="sec"><div class="label">时间线</div>' + timelineHtml(eventsOf(oid)) +
+      (S.canWrite ? '<form class="mini-form" id="f-note"><select class="inp" name="type" aria-label="类型"><option value="note">笔记</option><option value="meeting">会议</option></select><input class="inp" type="date" name="date" value="' + ymd() + '" aria-label="日期"><textarea class="inp wide" name="text" rows="3" required aria-label="内容" placeholder="写点什么。会议要点也可以直接发给 Agent，它会整理成下一步、承诺和洞察。"></textarea><button class="btn" type="submit">记下</button></form>' : "") + "</div>" +
+      (doneTs.length ? '<div class="sec"><div class="label">已完成</div>' + tasksHtml(doneTs) + "</div>" : "") + "</div>";
+    var st = $("o-stage"); if (st) st.addEventListener("change", function () { write("orgs", oid, { stage: st.value }); });
+    var ft = $("f-task"); if (ft) ft.addEventListener("submit", function (e) {
+      e.preventDefault(); var f = new FormData(ft);
+      write("tasks", newId("t"), { orgId: oid, kind: f.get("kind"), owner: f.get("owner"), due: f.get("due") || "", text: String(f.get("text")).trim(), done: false }, true).then(function (ok) { if (ok) toast("已加上"); });
+    });
+    var fn = $("f-note"); if (fn) fn.addEventListener("submit", function (e) {
+      e.preventDefault(); var f = new FormData(fn);
+      write("events", newId("e"), { orgIds: [oid], contactIds: [], type: f.get("type"), date: f.get("date") || ymd(), title: f.get("type") === "meeting" ? "会议" : "笔记", summary: String(f.get("text")).trim(), seen: true, by: "stella" }, true).then(function (ok) { if (ok) toast("已记下"); });
+    });
+  }
+  var PROFILE = [["about", "他们是谁", "一两句话：这家公司 / 实验室 / 项目在做什么"], ["dataUse", "他们在用什么数据、训练什么", "例如：用人类视频训练人形机器人；自己采集还是外购"],
+    ["whyMatters", "为什么对我们重要", "例如：可能是客户；能告诉我们数据缺什么"], ["needs", "他们可能需要什么", "例如：工厂场景数据、手部标注、样本视频"]];
+  function renderOrgProfile(box, oid, TABS, ps, openTs, ins) {
+    var org = S.orgs[oid], la = lastActivity(oid), next = openTs.filter(function (t) { return t.kind === "next_step"; })[0];
+    var stageName = (STAGES.filter(function (s) { return s[0] === (org.stage || ""); })[0] || ["", ""])[1];
+    var nm = {}; TOPICS.forEach(function (t) { nm[t[0]] = t[1]; });
+    var holds = ps.filter(function (c) { return c.hold; });
+    box.innerHTML = '<div class="body">' + TABS +
+      '<div class="row" style="margin-top:12px"><h2>' + esc(org.name) + '</h2><span class="chip">' + esc(OTYPE[org.type] || "") + "</span>" +
+      (org.customerType ? '<span class="chip gold">客户 · ' + esc(stageName) + "</span>" : "") + (org.url ? '<a href="' + esc(org.url) + '" target="_blank" rel="noopener">网站</a>' : "") + "</div>" +
+      '<div class="sec"><dl class="kv">' +
+      "<dt>联系情况</dt><dd>" + (ps.length ? ps.map(function (c) { return '<a href="#people" data-open-person="' + esc(c._id) + '">' + esc(c.name) + "</a> " + chipStatus(c.status); }).join("　") : "名单上还没有人") + "</dd>" +
+      '<dt>最近往来</dt><dd class="mono">' + esc(la ? la.slice(0, 10) : "还没联系") + "</dd>" +
+      "<dt>下一步</dt><dd>" + (next ? esc(next.text) + (next.due ? ' <span class="hint">' + esc(next.due) + "</span>" : "") : '<span class="hint">—</span>') + "</dd>" +
+      (openTs.length ? "<dt>未完成</dt><dd>" + openTs.map(function (t) { return '<div><span class="chip">' + esc(TASK_KIND[t.kind] || t.kind) + "</span> " + esc(t.text) + (t.due ? ' <span class="hint">' + esc(t.due) + "</span>" : "") + "</div>"; }).join("") + "</dd>" : "") +
+      (holds.length ? "<dt>提示</dt><dd>" + holds.map(function (c) { return '<span class="chip warn">' + esc(c.name + "：" + c.hold) + "</span>"; }).join(" ") + "</dd>" : "") +
+      "</dl></div>" +
+      '<div class="sec"><div class="label">我们对它的了解</div>' + PROFILE.map(function (f) {
+        var v = org[f[0]] || (f[0] === "about" ? org.notes || "" : "");
+        return '<div class="field"><label for="op-' + f[0] + '">' + f[1] + "</label>" + (S.canWrite
+          ? '<textarea id="op-' + f[0] + '" data-pf="' + f[0] + '" rows="2" class="inp" placeholder="' + esc(f[2]) + '">' + esc(v) + "</textarea>"
+          : '<div class="' + (v ? "" : "hint") + '">' + esc(v || "还没有") + "</div>") + "</div>";
+      }).join("") + '<span class="hint" id="op-state"></span></div>' +
+      '<div class="sec"><div class="label">学到的东西 · ' + ins.length + "</div>" + (ins.length ? '<ul class="tl">' + ins.map(function (i) { return "<li><b>" + esc(nm[i.topic] || i.topic) + "：</b>" + esc(i.text) + "</li>"; }).join("") + "</ul>" : '<div class="hint">还没有。聊过之后会出现在这里。</div>') + "</div>" +
+      "</div>";
+    box.querySelectorAll("[data-pf]").forEach(function (ta) {
+      ta.addEventListener("input", function () {
+        $("op-state").textContent = "正在保存…";
+        later("op:" + oid + ta.dataset.pf, function () { var p = {}; p[ta.dataset.pf] = ta.value.trim(); write("orgs", oid, p).then(function (ok) { $("op-state").textContent = ok ? "已保存" : ""; }); });
+      });
+    });
+  }
+  $("og-detail").addEventListener("click", function (e) { var b = e.target.closest("[data-otab]"); if (b) { S.orgTab = b.dataset.otab; renderOrgDetail(); } });
+  document.addEventListener("change", function (e) {
+    if (e.target.dataset && e.target.dataset.task) write("tasks", e.target.dataset.task, { done: e.target.checked, doneAt: e.target.checked ? now() : "" });
+  });
+
+  /* ---------- PEOPLE ---------- */
+  var COLS = [["name", "姓名"], ["cat", "类别 · 方向"], ["orgs", "机构"], ["status", "状态"], ["last", "最近联系"]];
+  function cellVal(c, k) {
+    return k === "cat" ? (CAT[catOf(c)] || "") + (c.direction || "") : k === "orgs" ? (c.orgIds || []).map(orgName).join("、") :
+      k === "status" ? Object.keys(STATUS).indexOf(c.status) : k === "last" ? (c.lastContactAt || c.sentAt || "") : (c[k] || "");
+  }
+  function ppFiltered() {
+    var f = S.pp;
+    return vals(S.contacts).filter(function (c) {
+      if (f.cat !== "all" && catOf(c) !== f.cat) return false;
+      if (f.dir !== "all" && String(c.direction || "") !== f.dir) return false;
+      if (f.status === "open" && ENDED.indexOf(c.status) >= 0) return false;
+      if (f.status === "ended" && ENDED.indexOf(c.status) < 0) return false;
+      if (["all", "open", "ended"].indexOf(f.status) < 0 && c.status !== f.status) return false;
+      if (f.q && (c.name + " " + (c.title || "") + " " + (c.orgIds || []).map(orgName).join(" ")).toLowerCase().indexOf(f.q.toLowerCase()) < 0) return false;
+      return true;
+    });
+  }
+  function renderPeople() {
+    $("pp-add").hidden = $("pp-import").hidden = !S.canWrite;
+    var rows = ppFiltered(), s = S.sort;
+    rows.sort(function (a, b) { var x = cellVal(a, s.k), y = cellVal(b, s.k); return (x > y ? 1 : x < y ? -1 : 0) * s.dir || a.name.localeCompare(b.name); });
+    var total = vals(S.contacts).filter(live).length;
+    $("pp-sub").textContent = "共 " + total + " 人，当前显示 " + rows.length + " 人";
+    $("pp-table").innerHTML = rows.length ? "<table><thead><tr>" + COLS.map(function (c) {
+      return '<th data-sort="' + c[0] + '"' + (s.k === c[0] ? ' aria-sort="' + (s.dir > 0 ? "ascending" : "descending") + '"' : "") + ">" + c[1] + (s.k === c[0] ? (s.dir > 0 ? " ↑" : " ↓") : "") + "</th>";
+    }).join("") + "</tr></thead><tbody>" + rows.map(function (c) {
+      return '<tr data-cid="' + esc(c._id) + '"' + (S.selPerson === c._id ? ' aria-current="true"' : "") + "><td><b>" + esc(c.name) + '</b><div class="hint">' + esc(c.title || "") + "</div></td><td>" + esc(CAT[catOf(c)] || "—") + (c.direction ? '<div class="hint">' + esc(DIR[c.direction]) + "</div>" : "") +
+        '</td><td class="orgs">' + esc((c.orgIds || []).map(orgName).join("、")) + "</td><td>" + chipStatus(c.status) + (c.email ? "" : '<div class="hint">缺邮箱</div>') + '</td><td class="mono" style="font-size:12px;white-space:nowrap">' + esc(c.lastContactAt || c.sentAt || "—") + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<div class="empty">没有符合条件的人。</div>';
+    renderPersonDetail();
+  }
+  $("pp-table").addEventListener("click", function (e) {
+    var th = e.target.closest("th[data-sort]");
+    if (th) { var k = th.dataset.sort; S.sort = { k: k, dir: S.sort.k === k ? -S.sort.dir : 1 }; renderPeople(); return; }
+    var tr = e.target.closest("tr[data-cid]"); if (tr) { S.selPerson = tr.dataset.cid; renderPeople(); if (window.matchMedia("(max-width:1050px)").matches) $("pp-detail").scrollIntoView({ behavior: "smooth" }); }
+  });
+  ["cat", "dir", "status"].forEach(function (k) { $("pp-" + k).addEventListener("change", function (e) { S.pp[k] = e.target.value; renderPeople(); }); });
+  $("pp-q").addEventListener("input", function (e) { S.pp.q = e.target.value; renderPeople(); });
+  function renderPersonDetail() {
+    var box = $("pp-detail"), cid = S.selPerson, c = S.contacts[cid];
+    $("pp-split").classList.toggle("solo", !c);
+    if (!c) { box.innerHTML = ""; return; }
+    var work = (c.work || []).map(function (w) { return '<a href="' + esc(w.url) + '" target="_blank" rel="noopener">' + esc(w.label || w.url) + "</a>"; }).join(" · ");
+    box.innerHTML = '<div class="body"><div class="row" style="justify-content:space-between"><div class="row"><h2>' + esc(c.name) + "</h2>" + chipStatus(c.status) + '</div><div class="actions">' + (S.canWrite ? '<button class="btn" type="button" id="p-edit">编辑</button>' : "") + '<button class="btn ghost" type="button" id="p-close" aria-label="关闭">关闭</button></div></div>' +
+      '<div class="hint" style="margin-bottom:12px">' + esc(c.title || "") + "</div>" +
+      '<dl class="kv"><dt>类别</dt><dd>' + esc(CAT[catOf(c)] || "—") + (c.direction ? " · " + esc(DIR[c.direction]) : "") + "</dd>" +
+      "<dt>机构</dt><dd>" + ((c.orgIds || []).map(function (o) { return '<a href="#orgs" data-open-org="' + esc(o) + '">' + esc(orgName(o)) + "</a>"; }).join("、") || "—") + "</dd>" +
+      (c.why ? "<dt>为什么找他</dt><dd>" + esc(c.why) + "</dd>" : "") + (work ? "<dt>相关工作</dt><dd>" + work + "</dd>" : "") +
+      (c.homepage ? '<dt>主页</dt><dd><a href="' + esc(c.homepage) + '" target="_blank" rel="noopener">' + esc(c.homepage) + "</a></dd>" : "") +
+      "<dt>邮箱</dt><dd>" + (c.email ? '<span class="mono">' + esc(c.email) + '</span> <button class="btn ghost" type="button" id="p-copy-email">复制</button>' : '<span class="hint">还没有' + (c.emailSource ? "（" + esc(c.emailSource) + "）" : "") + "</span>") + "</dd>" +
+      (c.introducedBy ? "<dt>介绍人</dt><dd>" + esc(c.introducedBy) + "</dd>" : "") + (c.verify ? '<dt>待核实</dt><dd><span class="chip warn">' + esc(c.verify) + "</span></dd>" : "") +
+      (c.hold ? '<dt>机构提示</dt><dd><span class="chip warn">' + esc(c.hold) + "</span></dd>" : "") + (c.rejectReason ? "<dt>不联系原因</dt><dd>" + esc(c.rejectReason) + "</dd>" : "") +
+      (c.sentAt ? '<dt>首次发送</dt><dd class="mono">' + esc(c.sentAt) + "</dd>" : "") + (c.verifiedAt ? '<dt>核实日期</dt><dd class="mono">' + esc(c.verifiedAt) + "</dd>" : "") + "</dl>" +
+      (c.draft && c.draft.body ? '<div class="sec"><div class="label">邮件</div>' + editorHtml(c) + "</div>" : "") +
+      '<div class="sec"><div class="label">和他的往来</div>' + timelineHtml(eventsOf(null, cid)) + "</div></div>";
+    var ce = $("p-copy-email"); if (ce) ce.addEventListener("click", function () { copy(c.email, "邮箱"); });
+    var pe = $("p-edit"); if (pe) pe.addEventListener("click", function () { openPersonForm(cid); });
+    $("p-close").addEventListener("click", function () { S.selPerson = null; renderPeople(); });
+    bindEditors(box);
+  }
+
+  /* person form */
+  var editing = null;
+  $("f-status").innerHTML = Object.keys(STATUS).map(function (k) { return '<option value="' + k + '">' + STATUS[k] + "</option>"; }).join("");
+  function openPersonForm(cid) {
+    editing = cid || null; var c = cid ? S.contacts[cid] : {};
+    $("h-person").textContent = cid ? "编辑 " + c.name : "添加一个人";
+    $("f-name").value = c.name || ""; $("f-title").value = c.title || ""; $("f-cat").value = cid ? catOf(c) || "researcher" : "researcher";
+    $("f-dir").value = c.direction || ""; $("f-email").value = c.email || ""; $("f-home").value = c.homepage || "";
+    $("f-orgs").value = (c.orgIds || []).map(orgName).join(", "); $("f-why").value = c.why || ""; $("f-verify").value = c.verify || "";
+    $("f-status").value = c.status || "to_confirm"; $("f-state").textContent = "";
+    $("org-names").innerHTML = vals(S.orgs).map(function (o) { return '<option value="' + esc(o.name) + '">'; }).join("");
+    $("dlg-person").showModal();
+  }
+  $("pp-add").addEventListener("click", function () { openPersonForm(null); });
+  function resolveOrgs(text) {
+    var names = text.split(/[,，、]/).map(function (s) { return s.trim(); }).filter(Boolean), ids = [], creates = [];
+    names.forEach(function (n) {
+      var hit = Object.keys(S.orgs).filter(function (o) { return S.orgs[o].name.toLowerCase() === n.toLowerCase(); })[0];
+      if (hit) { ids.push(hit); return; }
+      var id = "org-" + slug(n); while (S.orgs[id] || ids.indexOf(id) >= 0) id += "-x";
+      ids.push(id); creates.push([id, { name: n, type: "company", url: "", notes: "Stella 手动添加" }]);
+    });
+    return { ids: ids, creates: creates };
+  }
+  $("person-form").addEventListener("submit", function (e) {
+    if (!e.submitter || e.submitter.value !== "save") return;
+    e.preventDefault();
+    var name = $("f-name").value.trim(); if (!name) { $("f-state").textContent = "请填姓名"; return; }
+    var cat = $("f-cat").value, ro = resolveOrgs($("f-orgs").value);
+    ro.creates.forEach(function (x) { write("orgs", x[0], x[1], true); });
+    var patch = { name: name, title: $("f-title").value.trim(), track: cat === "customer" ? "customer" : "expert", category: cat === "customer" ? "" : cat,
+      direction: cat === "researcher" ? $("f-dir").value : "", email: $("f-email").value.trim(), homepage: $("f-home").value.trim(), orgIds: ro.ids,
+      why: $("f-why").value.trim(), verify: $("f-verify").value.trim(), status: $("f-status").value };
+    if (patch.email && !(editing && S.contacts[editing].email === patch.email)) patch.emailSource = "Stella 手动填写";
+    var id = editing || ("c-" + slug(name)); if (!editing) while (S.contacts[id]) id += "-x";
+    write("contacts", id, patch, !editing).then(function (ok) { if (ok) { $("dlg-person").close(); S.selPerson = id; toast(editing ? "已保存" : "已添加 " + name); } });
+  });
+
+  /* CSV import / export */
+  function parseCSV(text) {
+    var rows = [], row = [], cell = "", q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) { if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (ch === '"') q = false; else cell += ch; }
+      else if (ch === '"') q = true; else if (ch === ",") { row.push(cell); cell = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+      else cell += ch;
+    }
+    if (cell || row.length) { row.push(cell); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (c) { return c.trim(); }); });
+  }
+  var ALIAS = { name: ["name", "姓名", "名字"], email: ["email", "邮箱", "e-mail"], title: ["title", "职位", "身份"], org: ["org", "organization", "company", "机构", "公司"],
+    category: ["category", "类别"], direction: ["direction", "方向"], homepage: ["homepage", "主页", "website", "url"], why: ["why", "原因", "为什么找他"] };
+  var pending = [];
+  $("pp-import").addEventListener("click", function () { $("pp-file").value = ""; $("pp-file").click(); });
+  $("pp-file").addEventListener("change", function () {
+    var file = $("pp-file").files[0]; if (!file) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      var rows = parseCSV(String(rd.result).replace(/^﻿/, "")); if (rows.length < 2) { toast("文件里没有数据"); return; }
+      var head = rows[0].map(function (h) { return h.trim().toLowerCase(); }), col = {};
+      Object.keys(ALIAS).forEach(function (k) { col[k] = head.findIndex(function (h) { return ALIAS[k].indexOf(h) >= 0; }); });
+      if (col.name < 0) { toast("找不到“姓名 / name”这一列"); return; }
+      var catMap = { 研究者: "researcher", researcher: "researcher", 一线工程师: "engineer", engineer: "engineer", 看市场的人: "market", market: "market", 客户: "customer", customer: "customer" };
+      var names = {}; vals(S.contacts).forEach(function (c) { names[c.name.toLowerCase()] = 1; });
+      pending = []; var dup = 0;
+      rows.slice(1).forEach(function (r) {
+        var g = function (k) { return col[k] >= 0 ? String(r[col[k]] || "").trim() : ""; };
+        var name = g("name"); if (!name) return;
+        if (names[name.toLowerCase()]) { dup++; return; }
+        names[name.toLowerCase()] = 1;
+        pending.push({ name: name, email: g("email"), title: g("title"), org: g("org"), cat: catMap[g("category").toLowerCase()] || catMap[g("category")] || "customer", dir: (g("direction").match(/[1-4]/) || [""])[0], homepage: g("homepage"), why: g("why") });
+      });
+      $("imp-preview").textContent = "可以导入 " + pending.length + " 人" + (dup ? "，" + dup + " 人已在名单里，跳过" : "") + "。\n" + pending.slice(0, 6).map(function (p) { return "· " + p.name + (p.org ? "（" + p.org + "）" : "") + (p.email ? " " + p.email : ""); }).join("\n") + (pending.length > 6 ? "\n……" : "");
+      $("imp-go").disabled = !pending.length; $("dlg-import").showModal();
+    };
+    rd.readAsText(file);
+  });
+  $("import-form").addEventListener("submit", function (e) {
+    if (!e.submitter || e.submitter.value !== "save") return;
+    e.preventDefault();
+    var made = {};
+    var jobs = pending.map(function (p) {
+      var ro = resolveOrgs(p.org);
+      ro.creates.forEach(function (x) { if (!made[x[0]]) { made[x[0]] = 1; x[1].notes = "从 CSV 导入"; if (p.cat === "customer") x[1].customerType = "robot_company"; write("orgs", x[0], x[1], true); } });
+      var id = "c-" + slug(p.name); while (S.contacts[id]) id += "-x";
+      return write("contacts", id, { name: p.name, email: p.email, emailSource: p.email ? "CSV 导入" : "", title: p.title, orgIds: ro.ids, track: p.cat === "customer" ? "customer" : "expert", category: p.cat === "customer" ? "" : p.cat, direction: p.dir, homepage: p.homepage, why: p.why, status: "to_confirm", verify: "从 CSV 导入，Agent 会核实" }, true);
+    });
+    Promise.all(jobs).then(function () { $("dlg-import").close(); toast("已导入 " + jobs.length + " 人，在“今天”里确认"); });
+  });
+  $("pp-export").addEventListener("click", function () {
+    var cols = ["name", "category", "direction", "title", "orgs", "status", "email", "homepage", "why", "sentAt", "lastContactAt"];
+    var rows = [cols.join(",")].concat(ppFiltered().map(function (c) {
+      return cols.map(function (k) { var v = k === "orgs" ? (c.orgIds || []).map(orgName).join(" / ") : k === "category" ? CAT[catOf(c)] || "" : k === "status" ? STATUS[c.status] || c.status : (c[k] == null ? "" : c[k]); return '"' + String(v).replace(/"/g, '""') + '"'; }).join(",");
+    }));
+    downloads.save({ filename: "luckey-people-" + ymd() + ".csv", data: "﻿" + rows.join("\n") }).catch(function () {});
+  });
+
+  /* ---------- settings ---------- */
+  $("btn-settings").addEventListener("click", function () {
+    $("s-name").value = S.sender.name || ""; $("s-berk").value = S.sender.berk || ""; $("s-role").value = S.sender.role || ""; $("s-sig").value = S.sender.signature || DEFAULT_SIG;
+    $("settings-form").querySelectorAll("input,textarea").forEach(function (x) { x.readOnly = !S.canWrite; });
+    $("dlg-settings").showModal();
+  });
+  $("settings-form").addEventListener("submit", function (e) {
+    if (!e.submitter || e.submitter.value !== "save") return;
+    e.preventDefault();
+    saveSender({ name: $("s-name").value.trim(), berk: $("s-berk").value.trim(), role: $("s-role").value.trim(), signature: $("s-sig").value });
+  });
+
+  /* ---------- render ---------- */
+  function renderPage() {
+    var n = vals(S.contacts).filter(function (c) { return c.status === "to_confirm" || (c.draft && c.draft.body && !c.draft.ready); }).length +
+      vals(S.events).filter(function (e) { return e.type === "email_received" && !e.seen; }).length + dueItems().length;
+    $("nav-today").hidden = !n; $("nav-today").textContent = n;
+    ({ overview: renderOverview, today: renderToday, customers: renderCustomers, insights: renderInsights, reports: renderReports, orgs: renderOrgs, people: renderPeople })[S.page]();
+  }
+  var rq = 0;
+  function render() {
+    if (rq) return;
+    rq = requestAnimationFrame(function () {
+      rq = 0;
+      var a = document.activeElement;
+      if (a && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && ["checkbox", "file"].indexOf(a.type) < 0)) && a.closest(".editor, .mini-form, dialog")) { setTimeout(render, 800); return; }
+      renderPage();
+    });
+  }
+
+  /* ---------- boot: sign in, then load everything and listen for changes ---------- */
+  var ALL = ["members", "people", "orgs", "person_orgs", "interactions", "insights", "tasks", "drafts", "reports", "settings"];
+  go(location.hash.slice(1));
+  $("pp-export").hidden = false;
+
+  function showLogin(msg) {
+    $("login").hidden = false;
+    $("login-msg").textContent = msg || "";
+  }
+  $("login-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = $("login-email").value.trim(); if (!email) return;
+    $("login-msg").textContent = "正在发送…";
+    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + location.pathname, shouldCreateUser: true } }).then(function (res) {
+      $("login-msg").textContent = !res.error ? "登录链接已发到 " + email + "。请在这个浏览器里点开最新的那封邮件（只点一次）。"
+        : /rate limit/i.test(res.error.message) ? "发得太频繁了：免费版每小时只能发几封登录邮件。请过一小时左右再试。"
+        : "发送失败：" + res.error.message;
+    });
+  });
+  $("btn-signout").addEventListener("click", function () { sb.auth.signOut().then(function () { location.reload(); }); });
+
+  function renderMembers() {
+    var box = $("members-box"); if (!box) return;
+    box.hidden = !(ME && ME.role === "owner");
+    $("members-list").innerHTML = RAW.members.map(function (m) {
+      return '<div class="row" style="margin:4px 0"><b>' + esc(m.name) + '</b><span class="hint mono">' + esc(m.email) + '</span><span class="chip">' +
+        esc({ owner: "管理员", member: "成员", viewer: "只读" }[m.role] || m.role) + "</span>" + (m.auth_user_id ? '<span class="chip ok">已登录过</span>' : '<span class="chip warn">还没登录</span>') + "</div>";
+    }).join("");
+  }
+  $("m-add").addEventListener("click", function () {
+    var name = $("m-name").value.trim(), email = $("m-email").value.trim();
+    if (!name || !email) { toast("请填名字和邮箱"); return; }
+    sb.from("members").insert({ name: name, email: email.toLowerCase(), role: $("m-role").value }).then(must)
+      .then(function () { $("m-name").value = ""; $("m-email").value = ""; toast("已添加 " + name); return refresh(["members"]).then(renderMembers); }, function (e) { toast("添加失败：" + e.message); });
+  });
+  $("btn-settings").addEventListener("click", renderMembers);
+
+  var subscribed = false;
+  function start(session) {
+    if (!session) { showLogin(); return; }
+    sb.rpc("claim_membership").then(function (res) {
+      var m = res.data;
+      if (res.error || !m || !m.id) { showLogin("你用的邮箱（" + session.user.email + "）还不是成员。请让管理员在“设置 → 成员”里添加你。"); return; }
+      ME = m; $("login").hidden = true;
+      $("me-name").textContent = ME.name + (ME.role === "viewer" ? "（只读）" : "");
+      S.canWrite = true; if (ME.role === "viewer") setReadOnly();
+      refresh(ALL).then(function () { $("notice").hidden = S.canWrite; });
+      if (subscribed) return; subscribed = true;
+      var pending = {}, t = null;
+      var ch = sb.channel("desk");
+      ALL.forEach(function (table) {
+        ch.on("postgres_changes", { event: "*", schema: "public", table: table }, function () {
+          pending[table] = 1; clearTimeout(t);
+          t = setTimeout(function () { var ts = Object.keys(pending); pending = {}; refresh(ts); }, 400);
+        });
+      });
+      ch.subscribe();
+    });
+  }
+  var urlErr = /error_code=([a-z_]+)/.exec(location.search + location.hash);
+  if (urlErr) history.replaceState(null, "", location.pathname);
+  sb.auth.getSession().then(function (res) {
+    var s = res.data && res.data.session;
+    if (!s && urlErr) showLogin(urlErr[1] === "otp_expired"
+      ? "这个登录链接已经失效了（每封只能用一次，而且只有最新的一封有效）。请重新发送，并点开最新的那封邮件。"
+      : "登录没有成功（" + urlErr[1] + "）。请重新发送登录链接。");
+    else start(s);
+  });
+  sb.auth.onAuthStateChange(function (ev, session) { if (ev === "SIGNED_IN" && !ME) start(session); });
+})();
+</script>
+
+</body></html>
